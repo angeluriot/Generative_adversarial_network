@@ -10,7 +10,7 @@ FLIP_DATASET = True # Double the dataset by flipping the images
 # Outputs
 OUTPUT_DIR = "./output" # Path to the output directory
 OUTPUT_SHAPE = (7, 4) # Shape of the output image (columns, rows)
-SAVE_FREQUENCY = 1000 # in steps
+SAVE_FREQUENCY = 1000 # Save frequency (in steps)
 
 # Model
 LATENT_DIM = 512 # Dimension of the latent space
