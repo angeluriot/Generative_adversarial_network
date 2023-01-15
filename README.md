@@ -55,7 +55,7 @@ $ pip install tensorflow-addons
 
 # Training
 
-* First, you need to find and download a dataset of images (At least 5,000 images but the more the better). You can find a lot of datasets on [**Kaggle**](https://www.kaggle.com/datasets)
+* First, you need to find and download a dataset of images (at least 5,000 images but the more the better). You can find a lot of datasets on [**Kaggle**](https://www.kaggle.com/datasets)
 
 * Then, in the `settings.py` file:
 	* Specify the **path** to the dataset
@@ -80,9 +80,9 @@ The model structure is very similar to [**StyleGAN2**](https://doi.org/10.48550/
 
 * **Path Length Regularization** is missing
 
-* I added a tanh activation to the generator output
+* I added a **tanh** activation to the generator output
 
-* I set the gain of the equalized learning rate layers to 1.2 (instead of 1)
+* I set the **gain** of the **equalized learning rate layers** to 1.2 (instead of 1)
 
 * I implemented **Adaptive Discriminator Augmentation (ADA)** from the paper [**Training Generative Adversarial Networks with Limited Data**](https://doi.org/10.48550/arXiv.2006.06676) *(from [**Nvidia**](https://www.nvidia.com/))* but the augmentation probability is constant (instead of being trained)
 
