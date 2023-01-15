@@ -3,7 +3,7 @@
 ![Release](https://img.shields.io/badge/Release-v1.0-blueviolet)
 ![Language](https://img.shields.io/badge/Language-Python-f2cb1b)
 ![Libraries](https://img.shields.io/badge/Libraries-Keras-00cf2c)
-![Size](https://img.shields.io/badge/Size-2Mo-f12222)
+![Size](https://img.shields.io/badge/Size-257Mo-f12222)
 ![Open Source](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)
 
 <br/>
