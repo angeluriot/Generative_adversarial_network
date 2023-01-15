@@ -1,0 +1,13 @@
+/.vscode
+__pycache__
+/venv
+/datasets
+/bacup
+/timelapse
+/test.py
+/gif.ipynb
+/output
+/gif
+/GAN
+/test.ipynb
+/test.png
