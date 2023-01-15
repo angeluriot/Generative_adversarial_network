@@ -79,8 +79,11 @@ $ pip install tensorflow-addons
 The model structure is very similar to [**StyleGAN2**](https://doi.org/10.48550/arXiv.1912.04958) *(from [**Nvidia**](https://www.nvidia.com/))* with a few differences:
 
 * Path length regularization is missing
+
 * I added a tanh activation to the generator output
+
 * I set the gain of the equalized learning rate layers to 1.2 (instead of 1)
+
 * I implemented **Adaptive Discriminator Augmentation (ADA)** from the paper [**Training Generative Adversarial Networks with Limited Data**](https://doi.org/10.48550/arXiv.2006.06676) *(from [**Nvidia**](https://www.nvidia.com/))* but the augmentation probability is constant (instead of being trained)
 
 <br/>
