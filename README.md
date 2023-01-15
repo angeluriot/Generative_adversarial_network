@@ -78,7 +78,7 @@ $ pip install tensorflow-addons
 
 The model structure is very similar to [**StyleGAN2**](https://doi.org/10.48550/arXiv.1912.04958) *(from [**Nvidia**](https://www.nvidia.com/))* with a few differences:
 
-* Path length regularization is missing
+* **Path Length Regularization** is missing
 
 * I added a tanh activation to the generator output
 
