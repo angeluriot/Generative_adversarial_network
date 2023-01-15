@@ -62,7 +62,7 @@ $ pip install tensorflow-addons
 	* Set the **size** of the images
 	* Lower the **batch size**, the **min filters** or the **image size** if you don't have enough VRAM *(ResourceExhaustedError)*
 
-* Run the `training.ipynb` file
+* Run the `training.ipynb` file *(you can stop the training at any time and resume it later thanks to the checkpoints)*
 
 <br/>
 

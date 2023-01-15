@@ -87,14 +87,15 @@ class GAN(Model):
 			i += 1
 
 		if folder != "":
+
 			self.mapping.load_weights(os.path.join(folder, "mapping.h5"))
 			self.generator.load_weights(os.path.join(folder, "generator.h5"))
 			self.discriminator.load_weights(os.path.join(folder, "discriminator.h5"))
 			self.ma_mapping.load_weights(os.path.join(folder, "ma_mapping.h5"))
 			self.ma_generator.load_weights(os.path.join(folder, "ma_generator.h5"))
 
-		self.step = i * SAVE_FREQUENCY
-		self.tf_step.assign(self.step)
+			self.step = (i - 1) * SAVE_FREQUENCY
+			self.tf_step.assign(self.step)
 
 		return folder != ""
 
