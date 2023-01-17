@@ -224,6 +224,7 @@ class GAN(Model):
 		batch_size = tf.shape(data)[0]
 		const_input = [tf.ones((batch_size, 1))]
 		noise = self.get_noise(batch_size)
+		gradient_penalty = 0.
 
 		with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
 
@@ -246,17 +247,11 @@ class GAN(Model):
 			# Compute gradient penalty
 			if self.tf_step % GRADIENT_PENALTY_INTERVAL == 0:
 				gradient_penalty = self.gradient_penalty(real_output, data)
-			else:
-				gradient_penalty = 0.
-
-			disc_loss += gradient_penalty
-
-			# TODO ? Add path length regularization
 
 			# Get gradients
 			generator_weights = (self.mapping.trainable_weights + self.generator.trainable_weights)
 			generator_grad = gen_tape.gradient(gen_loss, generator_weights)
-			discriminator_grad = disc_tape.gradient(disc_loss, self.discriminator.trainable_variables)
+			discriminator_grad = disc_tape.gradient(disc_loss + gradient_penalty, self.discriminator.trainable_variables)
 
 			# Update weights
 			self.generator_optimizer.apply_gradients(zip(generator_grad, generator_weights))
