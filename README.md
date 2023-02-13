@@ -13,7 +13,7 @@ This project is a deep learning model that can create high quality images by tra
 <br/>
 
 <p align="center">
-	<img src="resources/misc/thumbnail.png" width="700">
+	<img src="resources/misc/thumbnail.png" width="750">
 </p>
 <p align="center"><b>(These animals do not exist)</b></p>
 
@@ -93,14 +93,14 @@ The model structure is very similar to [**StyleGAN2**](https://doi.org/10.48550/
 
 <p align="center"><b>Animal faces (256*256) <a href="https://twitter.com/DIMENSION_YT/status/1621922138054688773">[see more]</a></b></p>
 <p align="center">
-	<img src="resources/misc/animals.png" width="600">
+	<img src="resources/misc/animals.png" width="650">
 </p>
 
 <br/>
 
 <p align="center"><b>Anime faces (256*256) <a href="https://twitter.com/DIMENSION_YT/status/1619377981159538688">[see more]</a></b></p>
 <p align="center">
-	<img src="resources/misc/anime.png" width="600">
+	<img src="resources/misc/anime.png" width="650">
 </p>
 
 <br/>
