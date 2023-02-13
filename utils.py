@@ -8,6 +8,7 @@ def reset_rand():
 
 	now = dt.datetime.now()
 	seconds_since_midnight = int((now - now.replace(hour = 0, minute = 0, second = 0, microsecond = 0)).total_seconds())
+	np.random.seed(seconds_since_midnight)
 	tf.random.set_seed(seconds_since_midnight)
 
 

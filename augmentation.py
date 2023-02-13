@@ -13,10 +13,11 @@ def data_augmentation(data):
 	if PIXEL_AUGMENTATION:
 
 		# Horizontal flips
-		rand_tensor = tf.repeat(tf.random.uniform((batch_size,), minval = 0., maxval = 1., dtype = tf.float32), IMAGE_SIZE * IMAGE_SIZE * NB_CHANNELS)
-		rand_tensor = tf.reshape(rand_tensor, (batch_size, IMAGE_SIZE, IMAGE_SIZE, NB_CHANNELS))
-		flipped_data = tf.image.random_flip_left_right(data)
-		data = tf.where(rand_tensor < AUGMENTATION_PROBA, flipped_data, data)
+		if not FLIP_DATASET:
+			rand_tensor = tf.repeat(tf.random.uniform((batch_size,), minval = 0., maxval = 1., dtype = tf.float32), IMAGE_SIZE * IMAGE_SIZE * NB_CHANNELS)
+			rand_tensor = tf.reshape(rand_tensor, (batch_size, IMAGE_SIZE, IMAGE_SIZE, NB_CHANNELS))
+			flipped_data = tf.image.random_flip_left_right(data)
+			data = tf.where(rand_tensor < AUGMENTATION_PROBA, flipped_data, data)
 
 		# 90° rotations
 		angles = tf.random.uniform((batch_size,), minval = 0, maxval = 4, dtype = tf.int32)
