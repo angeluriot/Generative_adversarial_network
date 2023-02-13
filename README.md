@@ -1,20 +1,21 @@
 # Generative Adversarial Network (GAN)
 
-![Release](https://img.shields.io/badge/Release-v1.0-blueviolet)
+![Release](https://img.shields.io/badge/Release-v1.1-blueviolet)
 ![Language](https://img.shields.io/badge/Language-Python-f2cb1b)
 ![Libraries](https://img.shields.io/badge/Libraries-Keras-00cf2c)
-![Size](https://img.shields.io/badge/Size-257Mo-f12222)
+![Size](https://img.shields.io/badge/Size-519Mo-f12222)
 ![Open Source](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)
 
 <br/>
 
-This project is a deep learning model that can create high quality images by training on a dataset *(here an example with a dataset of cats 🐈)*.
+This project is a deep learning model that can create high quality images by training on a dataset *(here an example with a dataset of animals 🐶)*.
 
 <br/>
 
 <p align="center">
 	<img src="resources/misc/thumbnail.png" width="700">
 </p>
+<p align="center"><b>(These animals do not exist)</b></p>
 
 <br/>
 
@@ -90,16 +91,16 @@ The model structure is very similar to [**StyleGAN2**](https://doi.org/10.48550/
 
 # Tests
 
-<p align="center"><b>Cat faces (128*128)</b></p>
+<p align="center"><b>Animal faces (256*256) <a href="https://twitter.com/DIMENSION_YT/status/1621922138054688773">[see more]</a></b></p>
 <p align="center">
-	<img src="resources/misc/cats.png" width="500">
+	<img src="resources/misc/animals.png" width="600">
 </p>
 
 <br/>
 
-<p align="center"><b>Anime faces (128*128)</b></p>
+<p align="center"><b>Anime faces (256*256) <a href="https://twitter.com/DIMENSION_YT/status/1619377981159538688">[see more]</a></b></p>
 <p align="center">
-	<img src="resources/misc/anime.png" width="500">
+	<img src="resources/misc/anime.png" width="600">
 </p>
 
 <br/>
