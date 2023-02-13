@@ -211,8 +211,8 @@ class GAN(Model):
 	# Compute the gradient penalty
 	def gradient_penalty(self, real_output, real_images):
 
-		gradients = tf.gradients(real_output, real_images)[0]
-		gradient_penalty = tf.reduce_sum(tf.square(gradients), axis = tf.range(1, len(tf.shape(gradients))))
+		gradients = tf.gradients(tf.reduce_sum(real_output), [real_images])[0]
+		gradient_penalty = tf.reduce_sum(tf.square(gradients), axis = [1, 2, 3])
 
 		return tf.reduce_mean(gradient_penalty) * GRADIENT_PENALTY_COEF * 0.5 * GRADIENT_PENALTY_INTERVAL
 
@@ -249,7 +249,7 @@ class GAN(Model):
 				gradient_penalty = self.gradient_penalty(real_output, data)
 
 			# Get gradients
-			generator_weights = (self.mapping.trainable_weights + self.generator.trainable_weights)
+			generator_weights = self.mapping.trainable_weights + self.generator.trainable_weights
 			generator_grad = gen_tape.gradient(gen_loss, generator_weights)
 			discriminator_grad = disc_tape.gradient(disc_loss + gradient_penalty, self.discriminator.trainable_variables)
 
