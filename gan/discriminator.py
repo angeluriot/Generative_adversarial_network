@@ -20,7 +20,7 @@ def from_rgb(input: KerasTensor, filters: int) -> KerasTensor:
 def downsample(input: KerasTensor) -> KerasTensor:
 
 	# TODO ? Use StyleGAN3 non-sticking downsampling
-	return AveragePooling2D(padding = 'SAME')(input)
+	return AveragePooling2D(padding = 'same')(input)
 
 
 # Build a block

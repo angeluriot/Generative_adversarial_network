@@ -52,9 +52,9 @@ $ pip install -r requirements.txt
 
 # Training
 
-* First, you need to find and download a dataset of images (at least 5,000 images but the more the better). You can find a lot of datasets on [**Kaggle**](https://www.kaggle.com/datasets)
+* First, you need to find and download a dataset of images *(at least 5,000 images but the more the better)*. You can find a lot of datasets on [**Kaggle**](https://www.kaggle.com/datasets)
 
-* Then, in the `settings.py` file:
+* Then, in the `gan/settings.py` file:
 	* Specify the **path** to the dataset
 	* Set the **size** of the images
 	* Lower the **batch size**, the **min filters** or the **image size** if you don't have enough VRAM *(ResourceExhaustedError)*

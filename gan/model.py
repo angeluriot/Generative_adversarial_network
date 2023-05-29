@@ -17,11 +17,9 @@ from gan.augmentation import *
 # The class for the GAN
 class GAN(Model):
 
-	def __init__(self, train_seed: bool = False, **kwargs):
+	def __init__(self, **kwargs):
 
 		super().__init__(**kwargs)
-
-		self.train_seed = train_seed
 
 		self.mapping: Model = mapping.build_model()
 		self.generator: Model = generator.build_model()
@@ -163,7 +161,7 @@ class GAN(Model):
 
 
 	# Turn W latent vector into the final image
-	def w_to_img(self, w: npt.NDArray[np.float32], noise: npt.NDArray[np.float32] | None = None, psi: float = 1.0) -> npt.NDArray[np.uint8]:
+	def w_to_image(self, w: npt.NDArray[np.float32], noise: npt.NDArray[np.float32] | None = None, psi: float = 1.0) -> npt.NDArray[np.uint8]:
 
 		generations = np.zeros((w.shape[0], IMAGE_SIZE, IMAGE_SIZE, NB_CHANNELS), dtype = np.uint8)
 		w = self.mean_w + psi * (w - self.mean_w)
@@ -185,7 +183,7 @@ class GAN(Model):
 	# Give the output of the model from the inputs
 	def predict(self, z: npt.NDArray[np.float32], noise: npt.NDArray[np.float32] | None = None, psi: float = 1.0) -> npt.NDArray[np.uint8]:
 
-		return self.w_to_img(self.z_to_w(z, psi), noise)
+		return self.w_to_image(self.z_to_w(z, psi), noise)
 
 
 	# Generate images
