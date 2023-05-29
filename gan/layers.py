@@ -1,13 +1,15 @@
+import typing
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.layers import Layer
-from tensorflow.keras.initializers import *
+from keras.engine.keras_tensor import KerasTensor
+from keras.layers import Layer
+from keras.initializers.initializers_v2 import *
 
-from settings import *
+from gan.settings import *
 
 
 # Give the list of filters for each layer
-def get_filters(min_filters, max_filters, max_first):
+def get_filters(min_filters: int, max_filters: int, max_first: bool) -> list[int]:
 
 	filters = []
 
@@ -23,13 +25,13 @@ def get_filters(min_filters, max_filters, max_first):
 # Normalize the input latent vector
 class PixelNorm(Layer):
 
-	def __init__(self, epsilon = 1e-8, **kwargs):
+	def __init__(self, epsilon: float = 1e-8, **kwargs):
 
 		super().__init__(**kwargs)
-		self.epsilon = epsilon
+		self.epsilon: float = epsilon
 
 
-	def get_config(self):
+	def get_config(self) -> dict[str, typing.Any]:
 
 		config = super().get_config().copy()
 
@@ -40,7 +42,7 @@ class PixelNorm(Layer):
 		return config
 
 
-	def call(self, inputs):
+	def call(self, inputs: KerasTensor) -> KerasTensor:
 
 		return inputs * tf.math.rsqrt(tf.reduce_mean(tf.square(inputs), axis = -1, keepdims = True) + self.epsilon)
 
@@ -48,17 +50,17 @@ class PixelNorm(Layer):
 # Equalized learning rate dense layer
 class EqualizedDense(Layer):
 
-	def __init__(self, units, bias_init = 0., use_bias = True, gain = GAIN, lr_multiplier = 1., **kwargs):
+	def __init__(self, units: int, bias_init: float = 0.0, use_bias: bool = True, gain: float = GAIN, lr_multiplier: float = 1.0, **kwargs):
 
 		super().__init__(**kwargs)
-		self.units = units
-		self.bias_init = bias_init
-		self.use_bias = use_bias
-		self.gain = gain
-		self.lr_multiplier = lr_multiplier
+		self.units: int = units
+		self.bias_init: float = bias_init
+		self.use_bias: bool = use_bias
+		self.gain: float = gain
+		self.lr_multiplier: float = lr_multiplier
 
 
-	def get_config(self):
+	def get_config(self) -> dict[str, typing.Any]:
 
 		config = super().get_config().copy()
 
@@ -73,15 +75,15 @@ class EqualizedDense(Layer):
 		return config
 
 
-	def build(self, input_shape):
+	def build(self, input_shape: tuple[int, ...]) -> None:
 
 		super().build(input_shape)
 
 		self.weight = self.add_weight(
 			shape = (input_shape[-1], self.units),
-			initializer = RandomNormal(mean = 0., stddev = 1. / self.lr_multiplier),
+			initializer = RandomNormal(mean = 0.0, stddev = 1.0 / self.lr_multiplier),
 			trainable = True,
-			name = "kernel"
+			name = 'kernel'
 		)
 
 		if self.use_bias:
@@ -89,19 +91,19 @@ class EqualizedDense(Layer):
 				shape = (self.units,),
 				initializer = Constant(self.bias_init / self.lr_multiplier),
 				trainable = True,
-				name = "bias"
+				name = 'bias'
 			)
 
 		fan_in = input_shape[-1]
 		self.scale = self.gain / np.sqrt(fan_in)
 
 
-	def call(self, inputs):
+	def call(self, inputs: KerasTensor) -> KerasTensor:
 
 		output = tf.matmul(inputs, self.scale * self.weight * self.lr_multiplier)
 
 		if self.use_bias:
-			return output + (self.bias * self.lr_multiplier)
+			return output + (self.bias * self.lr_multiplier)[None, :]
 
 		return output
 
@@ -109,18 +111,18 @@ class EqualizedDense(Layer):
 # Equalized learning rate convolutional layer
 class EqualizedConv2D(Layer):
 
-	def __init__(self, filters, kernel_size, bias_init = 0., use_bias = True, gain = GAIN, lr_multiplier = 1., **kwargs):
+	def __init__(self, filters: int, kernel_size: int, bias_init: float = 0.0, use_bias: bool = True, gain: float = GAIN, lr_multiplier: float = 1.0, **kwargs):
 
 		super().__init__(**kwargs)
-		self.filters = filters
-		self.kernel_size = kernel_size
-		self.bias_init = bias_init
-		self.use_bias = use_bias
-		self.gain = gain
-		self.lr_multiplier = lr_multiplier
+		self.filters: int = filters
+		self.kernel_size: int = kernel_size
+		self.bias_init: float = bias_init
+		self.use_bias: bool = use_bias
+		self.gain: float = gain
+		self.lr_multiplier: float = lr_multiplier
 
 
-	def get_config(self):
+	def get_config(self) -> dict[str, typing.Any]:
 
 		config = super().get_config().copy()
 
@@ -136,15 +138,15 @@ class EqualizedConv2D(Layer):
 		return config
 
 
-	def build(self, input_shape):
+	def build(self, input_shape: tuple[int, ...]) -> None:
 
 		super().build(input_shape)
 
 		self.kernel = self.add_weight(
 			shape = (self.kernel_size, self.kernel_size, input_shape[-1], self.filters),
-			initializer = RandomNormal(mean = 0., stddev = 1. / self.lr_multiplier),
+			initializer = RandomNormal(mean = 0.0, stddev = 1.0 / self.lr_multiplier),
 			trainable = True,
-			name = "kernel",
+			name = 'kernel',
 		)
 
 		if self.use_bias:
@@ -153,16 +155,16 @@ class EqualizedConv2D(Layer):
 				shape = (self.filters,),
 				initializer = Constant(self.bias_init / self.lr_multiplier),
 				trainable = True,
-				name = "bias"
+				name = 'bias'
 			)
 
 		fan_in = self.kernel_size * self.kernel_size * input_shape[-1]
 		self.scale = self.gain / np.sqrt(fan_in)
 
 
-	def call(self, inputs):
+	def call(self, inputs: KerasTensor) -> KerasTensor:
 
-		output = tf.nn.conv2d(inputs, self.scale * self.kernel * self.lr_multiplier, strides = 1, padding = "SAME", data_format = "NHWC")
+		output = tf.nn.conv2d(inputs, self.scale * self.kernel * self.lr_multiplier, strides = 1, padding = 'SAME', data_format = 'NHWC')
 
 		if self.use_bias:
 			return output + (self.bias * self.lr_multiplier)[None, None, None, :]
@@ -173,13 +175,13 @@ class EqualizedConv2D(Layer):
 # Add a trainable amount of noise to the input
 class AddNoise(Layer):
 
-	def __init__(self, lr_multiplier = 1., **kwargs):
+	def __init__(self, lr_multiplier: float = 1.0, **kwargs):
 
 		super().__init__(**kwargs)
-		self.lr_multiplier = lr_multiplier
+		self.lr_multiplier: float = lr_multiplier
 
 
-	def get_config(self):
+	def get_config(self) -> dict[str, typing.Any]:
 
 		config = super().get_config().copy()
 
@@ -190,19 +192,19 @@ class AddNoise(Layer):
 		return config
 
 
-	def build(self, input_shape):
+	def build(self, input_shape: tuple[int, ...]) -> None:
 
 		super().build(input_shape)
 
 		self.noise_scale = self.add_weight(
-			shape = None,
-			initializer = Constant(0. / self.lr_multiplier),
+			shape = (),
+			initializer = Constant(0.0 / self.lr_multiplier),
 			trainable = True,
-			name = "noise_scale",
+			name = 'noise_scale',
 		)
 
 
-	def call(self, inputs):
+	def call(self, inputs: list[KerasTensor]) -> KerasTensor:
 
 		return inputs[0] + (self.noise_scale * self.lr_multiplier * inputs[1])
 
@@ -210,14 +212,14 @@ class AddNoise(Layer):
 # Add a trainable bias to the input
 class Bias(Layer):
 
-	def __init__(self, bias_init = 0., lr_multiplier = 1., **kwargs):
+	def __init__(self, bias_init: float = 0.0, lr_multiplier: float = 1.0, **kwargs):
 
 		super().__init__(**kwargs)
-		self.bias_init = bias_init
-		self.lr_multiplier = lr_multiplier
+		self.bias_init: float = bias_init
+		self.lr_multiplier: float = lr_multiplier
 
 
-	def get_config(self):
+	def get_config(self) -> dict[str, typing.Any]:
 
 		config = super().get_config().copy()
 
@@ -229,7 +231,7 @@ class Bias(Layer):
 		return config
 
 
-	def build(self, input_shape):
+	def build(self, input_shape: tuple[int, ...]) -> None:
 
 		super().build(input_shape)
 
@@ -237,11 +239,11 @@ class Bias(Layer):
 			shape = (input_shape[-1],),
 			initializer = Constant(self.bias_init / self.lr_multiplier),
 			trainable = True,
-			name = "bias"
+			name = 'bias'
 		)
 
 
-	def call(self, inputs):
+	def call(self, inputs: KerasTensor) -> KerasTensor:
 
 		return inputs + (self.bias * self.lr_multiplier)[None, None, None, :]
 
@@ -249,18 +251,18 @@ class Bias(Layer):
 # Equalized learning rate modulated convolutional layer
 class ModulatedConv2D(Layer):
 
-	def __init__(self, filters, kernel_size, demodulate = True, epsilon = 1e-8, gain = GAIN, lr_multiplier = 1., **kwargs):
+	def __init__(self, filters: int, kernel_size: int, demodulate: bool = True, epsilon: float = 1e-8, gain: float = GAIN, lr_multiplier: float = 1.0, **kwargs):
 
 		super().__init__(**kwargs)
-		self.filters = filters
-		self.kernel_size = kernel_size
-		self.demodulate = demodulate
-		self.epsilon = epsilon
-		self.gain = gain
-		self.lr_multiplier = lr_multiplier
+		self.filters: int= filters
+		self.kernel_size: int = kernel_size
+		self.demodulate: bool = demodulate
+		self.epsilon: float = epsilon
+		self.gain: float = gain
+		self.lr_multiplier: float = lr_multiplier
 
 
-	def get_config(self):
+	def get_config(self) -> dict[str, typing.Any]:
 
 		config = super().get_config().copy()
 
@@ -276,7 +278,7 @@ class ModulatedConv2D(Layer):
 		return config
 
 
-	def build(self, input_shape):
+	def build(self, input_shape: tuple[int, ...]) -> None:
 
 		super().build(input_shape)
 
@@ -284,16 +286,16 @@ class ModulatedConv2D(Layer):
 
 		self.kernel = self.add_weight(
 			shape = (self.kernel_size, self.kernel_size, x_shape[-1], self.filters),
-			initializer = RandomNormal(mean = 0., stddev = 1. / self.lr_multiplier),
+			initializer = RandomNormal(mean = 0.0, stddev = 1.0 / self.lr_multiplier),
 			trainable = True,
-			name = "kernel",
+			name = 'kernel',
 		)
 
 		fan_in = self.kernel_size * self.kernel_size * x_shape[-1]
 		self.scale = self.gain / np.sqrt(fan_in)
 
 
-	def call(self, inputs):
+	def call(self, inputs: list[KerasTensor]) -> KerasTensor:
 
 		x = inputs[0]
 		style = inputs[1]
@@ -314,7 +316,7 @@ class ModulatedConv2D(Layer):
 		w = tf.reshape(tf.transpose(ww, [1, 2, 3, 0, 4]), (ww.shape[1], ww.shape[2], ww.shape[3], -1))
 
 		# Convolution
-		output = tf.nn.conv2d(x, w, strides = 1, padding = "SAME", data_format = "NCHW")
+		output = tf.nn.conv2d(x, w, strides = 1, padding = 'SAME', data_format = 'NCHW')
 
 		# Reshape output
 		output = tf.reshape(output, (-1, self.filters, x.shape[2], x.shape[3]))
@@ -325,13 +327,13 @@ class ModulatedConv2D(Layer):
 # Add minibatch standard deviation to the input
 class MinibatchStdDev(Layer):
 
-	def __init__(self, epsilon = 1e-8, **kwargs):
+	def __init__(self, epsilon: float = 1e-8, **kwargs):
 
 		super().__init__(**kwargs)
-		self.epsilon = epsilon
+		self.epsilon: float = epsilon
 
 
-	def get_config(self):
+	def get_config(self) -> dict[str, typing.Any]:
 
 		config = super().get_config().copy()
 
@@ -342,7 +344,7 @@ class MinibatchStdDev(Layer):
 		return config
 
 
-	def call(self, inputs):
+	def call(self, inputs: KerasTensor) -> KerasTensor:
 
 		mean = tf.reduce_mean(inputs, axis = 0, keepdims = True)
 		squ_diffs = tf.square(inputs - mean)

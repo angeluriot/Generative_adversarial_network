@@ -1,14 +1,15 @@
-from tensorflow.keras import Model
-from tensorflow.keras.layers import *
+from keras.engine.keras_tensor import KerasTensor
+from keras import Model
+from keras.layers import *
 
-from settings import *
-from layers import *
+from gan.settings import *
+from gan.layers import *
 
 
 # Feature space to pixel space
-def to_rgb(input, w):
+def to_rgb(input: KerasTensor, w: KerasTensor) -> KerasTensor:
 
-	style = EqualizedDense(input.shape[-1], bias_init = 1.)(w)
+	style = EqualizedDense(input.shape[-1], bias_init = 1.0)(w)
 	model = ModulatedConv2D(NB_CHANNELS, 1, False)([input, style])
 	model = Bias()(model)
 
@@ -16,16 +17,16 @@ def to_rgb(input, w):
 
 
 # Upsample
-def upsample(input):
+def upsample(input: KerasTensor) -> KerasTensor:
 
 	# TODO ? Use StyleGAN3 non-sticking upsampling
-	return UpSampling2D(interpolation = "bilinear")(input)
+	return UpSampling2D(interpolation = 'bilinear')(input)
 
 
 # Build style block
-def build_style_block(input, w, noise, filters):
+def build_style_block(input: KerasTensor, w: KerasTensor, noise: KerasTensor, filters: int) -> KerasTensor:
 
-	style = EqualizedDense(input.shape[-1], bias_init = 1.)(w)
+	style = EqualizedDense(input.shape[-1], bias_init = 1.0)(w)
 	model = ModulatedConv2D(filters, KERNEL_SIZE, True)([input, style])
 
 	n = Cropping2D((noise.shape[1] - model.shape[1]) // 2)(noise)
@@ -37,7 +38,7 @@ def build_style_block(input, w, noise, filters):
 
 
 # Build a block
-def build_block(input, w, noise_1, noise_2, filters):
+def build_block(input: KerasTensor, w: KerasTensor, noise_1: KerasTensor, noise_2: KerasTensor, filters: int) -> KerasTensor:
 
 	model = build_style_block(input, w, noise_1, filters)
 	model = build_style_block(model, w, noise_2, filters)
@@ -48,7 +49,7 @@ def build_block(input, w, noise_1, noise_2, filters):
 
 
 # Build the generator
-def build_model():
+def build_model() -> Model:
 
 	filters = get_filters(GEN_MIN_FILTERS, GEN_MAX_FILTERS, True)
 
@@ -67,6 +68,11 @@ def build_model():
 		model, new_rgb = build_block(model, w_inputs[i], noise_inputs[(i * 2) - 1], noise_inputs[i * 2], filters[i])
 		rgb = Add()([upsample(rgb), new_rgb])
 
-	model_output = Activation("tanh")(rgb)
+	model_output = Activation('tanh')(rgb)
 
-	return Model([model_input] + w_inputs + noise_inputs, model_output)
+	model = Model([model_input] + w_inputs + noise_inputs, model_output)
+
+	for i in range(len(model.weights)):
+		model.weights[i]._handle_name = model.weights[i].name + "_" + str(i)
+
+	return model

@@ -1,13 +1,14 @@
 import math
-from tensorflow.keras import Model
-from tensorflow.keras.layers import *
+from keras import Model
+from keras.engine.keras_tensor import KerasTensor
+from keras.layers import *
 
-from settings import *
-from layers import *
+from gan.settings import *
+from gan.layers import *
 
 
 # Pixel space to feature space
-def from_rgb(input, filters):
+def from_rgb(input: KerasTensor, filters: int) -> KerasTensor:
 
 	model = EqualizedConv2D(filters, 1)(input)
 	model = LeakyReLU(ALPHA)(model)
@@ -16,14 +17,14 @@ def from_rgb(input, filters):
 
 
 # Downsample
-def downsample(input):
+def downsample(input: KerasTensor) -> KerasTensor:
 
 	# TODO ? Use StyleGAN3 non-sticking downsampling
-	return AveragePooling2D()(input)
+	return AveragePooling2D(padding = 'SAME')(input)
 
 
 # Build a block
-def build_block(input, filters):
+def build_block(input: KerasTensor, filters: int) -> KerasTensor:
 
 	residual = EqualizedConv2D(filters, 1, use_bias = False)(input)
 	residual = downsample(residual)
@@ -36,13 +37,13 @@ def build_block(input, filters):
 
 	model = downsample(model)
 	model = Add()([model, residual])
-	model = Lambda(lambda x: x / math.sqrt(2.))(model)
+	model = Lambda(lambda x: x / math.sqrt(2.0))(model)
 
 	return model
 
 
 # Build the discriminator
-def build_model():
+def build_model() -> Model:
 
 	filters = get_filters(DIS_MIN_FILTERS, DIS_MAX_FILTERS, False)
 
@@ -62,5 +63,10 @@ def build_model():
 
 	model_output = EqualizedDense(1)(model)
 
-	return Model(model_input, model_output)
+	model = Model(model_input, model_output)
+
+	for i in range(len(model.weights)):
+		model.weights[i]._handle_name = model.weights[i].name + "_" + str(i)
+
+	return model
 
