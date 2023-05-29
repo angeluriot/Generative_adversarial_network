@@ -38,20 +38,6 @@ class GAN(Model):
 
 		self.mean_w: npt.NDArray[np.float32] = np.zeros((LATENT_DIM,), dtype = np.float32)
 
-		if self.train_seed:
-
-			input = Input(shape = (1,))
-			w = Dense(LATENT_DIM, use_bias = False)(input)
-			self.w_model: Model = Model(inputs = input, outputs = w)
-
-			self.noise_models: list[Model] = []
-
-			for _ in range(NB_BLOCKS * 2 - 1):
-				input = Input(shape = (1,))
-				noise = Dense(IMAGE_SIZE * IMAGE_SIZE, use_bias = False)(input)
-				noise = Reshape((IMAGE_SIZE, IMAGE_SIZE, 1))(noise)
-				self.noise_models.append(Model(inputs = input, outputs = noise))
-
 
 	# Compile the model
 	def compile(self, **kwargs) -> None:
@@ -59,9 +45,6 @@ class GAN(Model):
 		super().compile(**kwargs)
 		self.generator_optimizer = Adam(LEARNING_RATE, BETA_1, BETA_2, EPSILON)
 		self.discriminator_optimizer = Adam(LEARNING_RATE, BETA_1, BETA_2, EPSILON)
-
-		if self.train_seed:
-			self.seed_optimizer = Adam(LEARNING_RATE, BETA_1, BETA_2, EPSILON)
 
 
 	# Print a summary of the model
@@ -78,26 +61,6 @@ class GAN(Model):
 		))
 
 		print('Discriminator: {} -> {} | {:,} parameters'.format(self.discriminator.input_shape, self.discriminator.output_shape, self.discriminator.count_params()))
-
-		if self.train_seed:
-
-			print('W model: {} -> {} | {:,} parameters'.format(self.w_model.input_shape, self.w_model.output_shape, self.w_model.count_params()))
-
-			print('Noise models: [{} -> {}] * {} | {:,} parameters'.format(
-				self.noise_models[0].input_shape,
-				self.noise_models[0].output_shape,
-				len(self.noise_models),
-				self.noise_models[0].count_params() * len(self.noise_models)
-			))
-
-
-	# Give the computed seed
-	def get_seed(self) -> tuple[npt.NDArray[np.float32], list[npt.NDArray[np.float32]]]:
-
-		w = self.w_model.predict(np.ones((1, 1), dtype = np.float32))
-		noise = [model.predict(np.ones((1, 1), dtype = np.float32)) for model in self.noise_models]
-
-		return w, noise
 
 
 	# Save the model
@@ -296,56 +259,9 @@ class GAN(Model):
 		return tf.reduce_mean(gradient_penalty) * GRADIENT_PENALTY_COEF * 0.5 * GRADIENT_PENALTY_INTERVAL
 
 
-	# Train step for the model
+	# Train step
 	@tf.function
-	def train_step_model(self, data: tf.Tensor) -> dict[str, float]:
-
-		batch_size = tf.shape(data)[0]
-		const_input = [tf.ones((batch_size, 1))]
-		noise = self.get_noise(batch_size)
-		gradient_penalty = 0.0
-
-		with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
-
-			# Generate images
-			w = self.get_w(batch_size)
-			fake_images = self.generator(const_input + w + noise, training = True)
-
-			# Data augmentation
-			data = data_augmentation(data)
-			fake_images = data_augmentation(fake_images)
-
-			# Get discriminator outputs
-			real_output = self.discriminator(data, training = True)
-			fake_output = self.discriminator(fake_images, training = True)
-
-			# Compute losses
-			gen_loss = self.generator_loss(fake_output)
-			disc_loss = self.discriminator_loss(real_output, fake_output)
-
-			# Compute gradient penalty
-			if self.tf_step % GRADIENT_PENALTY_INTERVAL == 0:
-				gradient_penalty = self.gradient_penalty(real_output, data)
-
-			# Get gradients
-			generator_weights = (self.mapping.trainable_weights + self.generator.trainable_weights)
-			generator_grad = gen_tape.gradient(gen_loss, generator_weights)
-			discriminator_grad = disc_tape.gradient(disc_loss + gradient_penalty, self.discriminator.trainable_variables)
-
-			# Update weights
-			self.generator_optimizer.apply_gradients(zip(generator_grad, generator_weights))
-			self.discriminator_optimizer.apply_gradients(zip(discriminator_grad, self.discriminator.trainable_variables))
-
-		return {
-			'Generator loss': gen_loss,
-			'Discriminator loss': disc_loss,
-			'Gradient penalty': gradient_penalty
-		}
-
-
-	# Train step for the seed
-	@tf.function
-	def train_step_model(self, data: tf.Tensor) -> dict[str, float]:
+	def train_step(self, data: tf.Tensor) -> dict[str, float]:
 
 		batch_size = tf.shape(data)[0]
 		const_input = [tf.ones((batch_size, 1))]

@@ -29,66 +29,46 @@ class Updates(Callback):
 # Save samples
 class SaveSamples(Callback):
 
-	def __init__(self, z: npt.NDArray[np.float32] | None, noise: npt.NDArray[np.float32] | None, train_seed: bool = False, **kwargs):
+	def __init__(self, z: npt.NDArray[np.float32], noise: npt.NDArray[np.float32], **kwargs):
 
 		super().__init__(**kwargs)
-		self.z: npt.NDArray[np.float32] | None = z
-		self.noise: npt.NDArray[np.float32] | None = noise
-		self.train_seed: bool = train_seed
+		self.z: npt.NDArray[np.float32] = z
+		self.noise: npt.NDArray[np.float32] = noise
 		self.epoch: int = 0
-
-
-	# Save samples
-	def save(self) -> None:
-
-		if self.train_seed:
-			z, noise = self.model.get_seed()
-			generations = self.model.predict(z, noise)
-		else:
-			generations = self.model.predict(self.z, list(self.noise))
-
-		output_image = np.full((
-			MARGIN + (OUTPUT_SHAPE[1] * (generations.shape[2] + MARGIN)),
-			MARGIN + (OUTPUT_SHAPE[0] * (generations.shape[1] + MARGIN)),
-			generations.shape[3]), 255, dtype = np.uint8
-		)
-
-		i = 0
-
-		for row in range(OUTPUT_SHAPE[1]):
-			for col in range(OUTPUT_SHAPE[0]):
-				r = row * (generations.shape[2] + MARGIN) + MARGIN
-				c = col * (generations.shape[1] + MARGIN) + MARGIN
-				output_image[r:r + generations.shape[2], c:c + generations.shape[1]] = generations[i]
-				i += 1
-
-		if not os.path.exists(SAMPLES_DIR):
-			os.makedirs(SAMPLES_DIR)
-
-		img = Image.fromarray(output_image)
-		img.save(os.path.join(SAMPLES_DIR, 'image_' + str(self.model.step // SAVE_FREQUENCY) + '.png'))
-		img.save(os.path.join(OUTPUT_DIR, 'last_image.png'))
-
-		if self.train_seed:
-			pickle.dump(z, open(os.path.join(OUTPUT_DIR, 'found_z.pkl'), 'wb'))
-			pickle.dumps(noise, open(os.path.join(OUTPUT_DIR, 'found_noise.pkl'), 'wb'))
 
 
 	def on_batch_end(self, batch: int, logs = {}) -> None:
 
-		if not self.train_seed and self.model.step % SAVE_FREQUENCY == 0 or self.model.step == 1:
-			self.save()
+		if self.model.step % SAVE_FREQUENCY == 0 or self.model.step == 1:
+
+			generations = self.model.predict(self.z, list(self.noise))
+
+			output_image = np.full((
+				MARGIN + (OUTPUT_SHAPE[1] * (generations.shape[2] + MARGIN)),
+				MARGIN + (OUTPUT_SHAPE[0] * (generations.shape[1] + MARGIN)),
+				generations.shape[3]), 255, dtype = np.uint8
+			)
+
+			i = 0
+
+			for row in range(OUTPUT_SHAPE[1]):
+				for col in range(OUTPUT_SHAPE[0]):
+					r = row * (generations.shape[2] + MARGIN) + MARGIN
+					c = col * (generations.shape[1] + MARGIN) + MARGIN
+					output_image[r:r + generations.shape[2], c:c + generations.shape[1]] = generations[i]
+					i += 1
+
+			if not os.path.exists(SAMPLES_DIR):
+				os.makedirs(SAMPLES_DIR)
+
+			img = Image.fromarray(output_image)
+			img.save(os.path.join(SAMPLES_DIR, 'image_' + str(self.model.step // SAVE_FREQUENCY) + '.png'))
+			img.save(os.path.join(OUTPUT_DIR, 'last_image.png'))
 
 
 	def on_epoch_begin(self, epoch: int, logs = {}) -> None:
 
 		self.epoch = epoch
-
-
-	def on_epoch_end(self, epoch: int, logs = {}) -> None:
-
-		if self.train_seed:
-			self.save()
 
 
 # Save models
