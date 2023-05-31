@@ -18,6 +18,6 @@ def build_model() -> Model:
 	model = Model(model_input, model)
 
 	for i in range(len(model.weights)):
-		model.weights[i]._handle_name = model.weights[i].name + "_" + str(i)
+		model.weights[i]._handle_name = model.weights[i].name + "_map_" + str(i)
 
 	return model

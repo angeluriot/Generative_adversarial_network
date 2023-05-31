@@ -2,14 +2,14 @@ import os
 import math
 
 # Dataset
-DATA_DIR = 'E:/Angel/Development/Datasets/Anime_faces_256' # Path to the dataset
+DATA_DIR = '<your dataset path>' # Path to the dataset
 IMAGE_SIZE = 256 # Width and height of the images
 NB_CHANNELS = 3 # Number of channels in the images
 FLIP_DATASET = True # Double the dataset by flipping the images
 
 # Outputs
 OUTPUT_DIR = './output' # Path to the output directory
-OUTPUT_SHAPE = (7, 8) # Shape of the output image (columns, rows)
+OUTPUT_SHAPE = (7, 4) # Shape of the output image (columns, rows)
 SAVE_FREQUENCY = 1000 # Save frequency (in steps)
 
 # Model
@@ -26,6 +26,7 @@ GAIN = 1.2 # Equalized layers gain
 
 # Training
 BATCH_SIZE = 4 # Batch size
+ACCUMULATION_STEPS = 2 # Gradient accumulation steps
 NB_EPOCHS = 100_000 # Number of epochs
 LEARNING_RATE = 0.002 # Learning rate
 MAPPING_LR_RATIO = 0.01 # Learning rate ratio of the mapping network
@@ -36,9 +37,9 @@ STYLE_MIX_PROBA = 0.9 # Probability of mixing styles
 GRADIENT_PENALTY_COEF = 10.0 # Gradient penalty coefficient
 GRADIENT_PENALTY_INTERVAL = 4 # Interval of gradient penalty
 MA_HALF_LIFE = 10.0 # Moving average half life
-AUGMENTATION_PROBA = 0.0 # Probability of images modifications
-PIXEL_AUGMENTATION = False # Pixel augmentation
-GEOMETRIC_AUGMENTATION = False # Geometric augmentation
+AUGMENTATION_PROBA = 0.2 # Probability of images modifications
+PIXEL_AUGMENTATION = True # Pixel augmentation
+GEOMETRIC_AUGMENTATION = True # Geometric augmentation
 
 # Calculated
 SAMPLES_DIR = os.path.join(OUTPUT_DIR, 'images')

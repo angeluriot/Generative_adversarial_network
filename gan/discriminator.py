@@ -66,7 +66,7 @@ def build_model() -> Model:
 	model = Model(model_input, model_output)
 
 	for i in range(len(model.weights)):
-		model.weights[i]._handle_name = model.weights[i].name + "_" + str(i)
+		model.weights[i]._handle_name = model.weights[i].name + "_dis_" + str(i)
 
 	return model
 

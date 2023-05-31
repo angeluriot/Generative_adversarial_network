@@ -31,6 +31,23 @@ class GAN(Model):
 		self.ma_generator: Model = clone_model(self.generator)
 		self.ma_generator.set_weights(self.generator.get_weights())
 
+		if ACCUMULATION_STEPS > 1:
+
+			self.generator_gradients: list[tf.Variable] = []
+
+			for i in range(len(self.mapping.trainable_variables)):
+				self.generator_gradients.append(tf.Variable(tf.zeros_like(self.mapping.trainable_variables[i]), trainable = False))
+
+			for i in range(len(self.generator.trainable_variables)):
+				self.generator_gradients.append(tf.Variable(tf.zeros_like(self.generator.trainable_variables[i]), trainable = False))
+
+			self.discriminator_gradients: list[tf.Variable] = []
+
+			for i in range(len(self.discriminator.trainable_variables)):
+				self.discriminator_gradients.append(tf.Variable(tf.zeros_like(self.discriminator.trainable_variables[i]), trainable = False))
+
+			self.accumulated_steps: tf.Variable = tf.Variable(0, dtype = tf.int32, trainable = False, name = 'accumulated_steps')
+
 		self.step: int = 0
 		self.tf_step: tf.Variable = tf.Variable(self.step, dtype = tf.int32, trainable = False, name = 'step')
 
@@ -293,9 +310,40 @@ class GAN(Model):
 			generator_grad = gen_tape.gradient(gen_loss, generator_weights)
 			discriminator_grad = disc_tape.gradient(disc_loss + gradient_penalty, self.discriminator.trainable_variables)
 
-			# Update weights
-			self.generator_optimizer.apply_gradients(zip(generator_grad, generator_weights))
-			self.discriminator_optimizer.apply_gradients(zip(discriminator_grad, self.discriminator.trainable_variables))
+			# If gradient accumulation is enabled
+			if ACCUMULATION_STEPS > 1:
+
+				# Accumulate gradients
+				for i in range(len(generator_grad)):
+					self.generator_gradients[i].assign_add(generator_grad[i] / float(ACCUMULATION_STEPS))
+
+				for i in range(len(discriminator_grad)):
+					self.discriminator_gradients[i].assign_add(discriminator_grad[i] / float(ACCUMULATION_STEPS))
+
+				# Increment counter
+				self.accumulated_steps.assign_add(1)
+
+				if self.accumulated_steps >= ACCUMULATION_STEPS:
+
+					# Update accumulated gradients
+					self.generator_optimizer.apply_gradients(zip(self.generator_gradients, generator_weights))
+					self.discriminator_optimizer.apply_gradients(zip(self.discriminator_gradients, self.discriminator.trainable_variables))
+
+					# Reset accumulated gradients
+					for i in range(len(self.generator_gradients)):
+						self.generator_gradients[i].assign(tf.zeros_like(self.generator_gradients[i]))
+
+					for i in range(len(self.discriminator_gradients)):
+						self.discriminator_gradients[i].assign(tf.zeros_like(self.discriminator_gradients[i]))
+
+					# Reset counter
+					self.accumulated_steps.assign(0)
+
+			# If gradient accumulation is disabled
+			else:
+				# Update weights
+				self.generator_optimizer.apply_gradients(zip(generator_grad, generator_weights))
+				self.discriminator_optimizer.apply_gradients(zip(discriminator_grad, self.discriminator.trainable_variables))
 
 		return {
 			'Generator loss': gen_loss,
