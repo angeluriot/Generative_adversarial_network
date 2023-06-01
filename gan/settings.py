@@ -3,14 +3,14 @@ import math
 
 # Dataset
 DATA_DIR = '<your dataset path>' # Path to the dataset
-IMAGE_SIZE = 256 # Width and height of the images
+IMAGE_SIZE = 512 # Width and height of the images
 NB_CHANNELS = 3 # Number of channels in the images
 FLIP_DATASET = True # Double the dataset by flipping the images
 
 # Outputs
 OUTPUT_DIR = './output' # Path to the output directory
 OUTPUT_SHAPE = (7, 4) # Shape of the output image (columns, rows)
-SAVE_FREQUENCY = 1000 # Save frequency (in steps)
+SAVE_FREQUENCY = 256 # Save frequency (in steps)
 
 # Model
 LATENT_DIM = 512 # Dimension of the latent space
@@ -18,7 +18,7 @@ MAPPING_LAYERS = 8 # Number of layers in the mapping network
 MIN_IMAGE_SIZE = 4 # The smallest size of convolutional layers
 GEN_MIN_FILTERS = 64 # The smallest number of filters in the generator
 GEN_MAX_FILTERS = 512 # The largest number of filters in the generator
-DIS_MIN_FILTERS = 32 # The smallest number of filters in the discriminator
+DIS_MIN_FILTERS = 64 # The smallest number of filters in the discriminator
 DIS_MAX_FILTERS = 512 # The largest number of filters in the discriminator
 KERNEL_SIZE = 3 # Size of the convolutional kernels
 ALPHA = 0.2 # LeakyReLU slope
@@ -26,7 +26,6 @@ GAIN = 1.2 # Equalized layers gain
 
 # Training
 BATCH_SIZE = 4 # Batch size
-ACCUMULATION_STEPS = 2 # Gradient accumulation steps
 NB_EPOCHS = 100_000 # Number of epochs
 LEARNING_RATE = 0.002 # Learning rate
 MAPPING_LR_RATIO = 0.01 # Learning rate ratio of the mapping network

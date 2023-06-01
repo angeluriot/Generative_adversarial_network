@@ -1,4 +1,4 @@
-import os, pickle
+import os
 import numpy.typing as npt
 import numpy as np
 from PIL import Image
