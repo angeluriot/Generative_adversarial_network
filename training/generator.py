@@ -6,6 +6,7 @@ from torch import nn
 from training.layers import *
 from training.settings import *
 from training import utils
+from training.wavelets import *
 
 
 # Mapping network
@@ -79,16 +80,16 @@ class StyleBlock(Module):
 		return self.activation(x)
 
 
-# To RGB block
-class ToRGB(Module):
+# To wevelet block
+class ToWevelet(Module):
 
 	def __init__(self, in_features: int, **kwargs):
 
 		super().__init__(**kwargs)
 
 		self.to_style = EqualizedLinear(LATENT_DIM, in_features, bias_init = 1.0)
-		self.modulated_conv = ModulatedConv2D(in_features, NB_CHANNELS, kernel_size = 1, demodulate = False)
-		self.bias = nn.Parameter(torch.zeros((NB_CHANNELS,)))
+		self.modulated_conv = ModulatedConv2D(in_features, NB_CHANNELS * 4, KERNEL_SIZE, demodulate = False)
+		self.bias = nn.Parameter(torch.zeros((NB_CHANNELS * 4,)))
 
 
 	def forward(self, x: torch.Tensor, w: torch.Tensor) -> torch.Tensor:
@@ -109,7 +110,7 @@ class SynthesisBlock(Module):
 		self.up_sample = Upsampling()
 		self.style_block_1 = StyleBlock(in_features, out_features)
 		self.style_block_2 = StyleBlock(out_features, out_features)
-		self.to_rgb = ToRGB(out_features)
+		self.to_wevelet = ToWevelet(out_features)
 
 
 	def forward(self, x: torch.Tensor, w: torch.Tensor, noise: list[torch.Tensor] | None = None) -> torch.Tensor:
@@ -124,7 +125,7 @@ class SynthesisBlock(Module):
 		x = self.style_block_1(x, w[0], noise[0])
 		x = self.style_block_2(x, w[1], noise[1])
 
-		images = self.to_rgb(x, w[2])
+		images = self.to_wevelet(x, w[2])
 
 		return x, images
 
@@ -139,10 +140,10 @@ class Synthesis(Module):
 		self.features_list = utils.get_features(GEN_MIN_FEATURES, GEN_MAX_FEATURES, max_features_first = True)
 		self.const_input = nn.Parameter(torch.randn((self.features_list[0], MIN_RESOLUTION, MIN_RESOLUTION)))
 		self.style_block = StyleBlock(self.features_list[0], self.features_list[0])
-		self.to_rgb = ToRGB(self.features_list[0])
+		self.to_wevelet = ToWevelet(self.features_list[0])
 		blocks = []
 
-		for i in range(len(self.features_list) - 1):
+		for i in range(len(self.features_list) - 2):
 			blocks.append(SynthesisBlock(self.features_list[i], self.features_list[i + 1]))
 
 		self.blocks = nn.ModuleList(blocks)
@@ -185,7 +186,7 @@ class Synthesis(Module):
 		# Initial block
 		x = self.const_input.repeat((batch_size, 1, 1, 1))
 		x = self.style_block(x, w[0], noise[0])
-		images = self.to_rgb(x, w[1])
+		images = self.to_wevelet(x, w[1])
 
 		# Synthesis blocks
 		i = 1
@@ -193,11 +194,15 @@ class Synthesis(Module):
 		for block in self.blocks:
 
 			x, new_images = block(x, w[i:i + 3], noise[i:i + 2])
-			images = self.up_sample(images) + new_images
+
+			images = inverse_wavelet_transform(images)
+			images = self.up_sample(images)
+			images = discrete_wavelet_transform(images)
+			images = images + new_images
 
 			i += 2
 
-		return images
+		return inverse_wavelet_transform(images)
 
 
 # Generator network

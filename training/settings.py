@@ -76,5 +76,5 @@ SAMPLES_DIR = os.path.join(OUTPUT_DIR, 'images')
 MODELS_DIR = os.path.join(OUTPUT_DIR, 'models')
 MARGIN = IMAGE_SIZE // 8
 NB_RESOLUTIONS = int(math.log(IMAGE_SIZE, 2)) - int(math.log(MIN_RESOLUTION, 2)) + 1
-NB_W = 2 * NB_RESOLUTIONS
-NB_NOISE = 2 * NB_RESOLUTIONS - 1
+NB_W = 2 * NB_RESOLUTIONS - 2
+NB_NOISE = 2 * NB_RESOLUTIONS - 3
