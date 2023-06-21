@@ -140,68 +140,29 @@ class ModulatedConv2D(Module):
 # Upsampling layer
 class Upsampling(Module):
 
-	def __init__(self, scale_factor: int = 2, **kwargs):
+	def __init__(self, **kwargs):
 
 		super().__init__(**kwargs)
 
-		self.up = nn.Upsample(scale_factor = scale_factor, mode = 'nearest')
-
-		pad_sizes = [
-			int((len(BLUR_FILTER) - 1) / 2),
-			int(math.ceil((len(BLUR_FILTER) - 1) / 2)),
-			int((len(BLUR_FILTER) - 1) / 2),
-			int(math.ceil((len(BLUR_FILTER) - 1) / 2))
-		]
-
-		self.padding = nn.ReflectionPad2d(pad_sizes)
-
-		filter = torch.tensor(BLUR_FILTER, dtype = torch.float32, device = DEVICE)
-		filter = filter[:, None] * filter[None, :]
-		self.filter = filter / filter.sum()
+		self.up_sample = nn.Upsample(scale_factor = 2, mode = 'bilinear')
 
 
 	def forward(self, x: torch.Tensor) -> torch.Tensor:
 
-		x = self.up(x)
-		x = self.padding(x)
-
-		in_features = x.shape[1]
-		filter = self.filter[None, None, :, :].repeat((in_features, 1, 1, 1))
-
-		return nn.functional.conv2d(x, filter, groups = x.shape[1])
+		return self.up_sample(x)
 
 
 # Downsampling layer
 class Downsampling(Module):
 
-	def __init__(self, scale_factor: int = 2, **kwargs):
+	def __init__(self, **kwargs):
 
 		super().__init__(**kwargs)
-
-		self.stride = scale_factor
-
-		pad_sizes = [
-			int((len(BLUR_FILTER) - 1) / 2),
-			int(math.ceil((len(BLUR_FILTER) - 1) / 2)),
-			int((len(BLUR_FILTER) - 1) / 2),
-			int(math.ceil((len(BLUR_FILTER) - 1) / 2))
-		]
-
-		self.padding = nn.ReflectionPad2d(pad_sizes)
-
-		filter = torch.tensor(BLUR_FILTER, dtype = torch.float32, device = DEVICE)
-		filter = filter[:, None] * filter[None, :]
-		self.filter = filter / filter.sum()
 
 
 	def forward(self, x: torch.Tensor) -> torch.Tensor:
 
-		x = self.padding(x)
-
-		in_features = x.shape[1]
-		filter = self.filter[None, None, :, :].repeat((in_features, 1, 1, 1))
-
-		return nn.functional.conv2d(x, filter, stride = self.stride, groups = in_features)
+		return nn.functional.interpolate(x, scale_factor = 0.5, mode = 'bilinear')
 
 
 # Minibatch standard deviation layer
