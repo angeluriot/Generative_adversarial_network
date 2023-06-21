@@ -159,10 +159,28 @@ class Downsampling(Module):
 
 		super().__init__(**kwargs)
 
+		pad_sizes = [
+			int((len(BLUR_FILTER) - 1) / 2),
+			int(math.ceil((len(BLUR_FILTER) - 1) / 2)),
+			int((len(BLUR_FILTER) - 1) / 2),
+			int(math.ceil((len(BLUR_FILTER) - 1) / 2))
+		]
+
+		self.padding = nn.ReflectionPad2d(pad_sizes)
+
+		filter = torch.tensor(BLUR_FILTER, dtype = torch.float32, device = DEVICE)
+		filter = filter[:, None] * filter[None, :]
+		self.filter = filter / filter.sum()
+
 
 	def forward(self, x: torch.Tensor) -> torch.Tensor:
 
-		return nn.functional.interpolate(x, scale_factor = 0.5, mode = 'bilinear')
+		x = self.padding(x)
+
+		in_features = x.shape[1]
+		filter = self.filter[None, None, :, :].repeat((in_features, 1, 1, 1))
+
+		return nn.functional.conv2d(x, filter, stride = 2, groups = in_features)
 
 
 # Minibatch standard deviation layer
