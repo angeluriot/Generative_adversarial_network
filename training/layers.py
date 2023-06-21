@@ -155,7 +155,7 @@ class Upsampling(Module):
 
 		self.padding = nn.ReflectionPad2d(pad_sizes)
 
-		filter = torch.Tensor(BLUR_FILTER, device = DEVICE).to(dtype = torch.float32)
+		filter = torch.tensor(BLUR_FILTER, dtype = torch.float32, device = DEVICE)
 		filter = filter[:, None] * filter[None, :]
 		self.filter = filter / filter.sum()
 
@@ -189,7 +189,7 @@ class Downsampling(Module):
 
 		self.padding = nn.ReflectionPad2d(pad_sizes)
 
-		filter = torch.Tensor(BLUR_FILTER, device = DEVICE).to(dtype = torch.float32)
+		filter = torch.tensor(BLUR_FILTER, dtype = torch.float32, device = DEVICE)
 		filter = filter[:, None] * filter[None, :]
 		self.filter = filter / filter.sum()
 
