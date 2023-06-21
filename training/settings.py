@@ -4,7 +4,7 @@ import torch
 
 # ---------- Dataset ---------- #
 
-DATA_DIR = 'E:/Angel/Development/Datasets/Anime_faces_512' # Path to the dataset
+DATA_DIR = 'D:/Datasets/Anime_faces' # Path to the dataset
 IMAGE_SIZE = 256 # Width and height of the images
 NB_CHANNELS = 3 # Number of channels in the images
 FLIP_DATASET = True # Double the dataset by flipping the images
@@ -13,7 +13,7 @@ NB_WORKERS = 8 # Number of workers for the dataloader
 # ---------- Outputs ---------- #
 
 OUTPUT_DIR = './output' # Path to the output directory
-OUTPUT_SHAPE = (7, 8) # Shape of the output image (columns, rows)
+OUTPUT_SHAPE = (8, 8) # Shape of the output image (columns, rows)
 MODEL_SAVE_FREQUENCY = 1000 # Model save frequency (in steps)
 SAMPLE_SAVE_FREQUENCY = 100 # Sample save frequency (in steps)
 
