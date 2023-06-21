@@ -137,69 +137,71 @@ class ModulatedConv2D(Module):
 		return x.reshape(batch_size, -1, height, width)
 
 
-# Smooth layer
-class Smooth(Module):
-
-	def __init__(self, **kwargs):
-
-		super().__init__(**kwargs)
-
-		kernel = [
-			[1, 2, 1],
-			[2, 4, 2],
-			[1, 2, 1]
-		]
-
-		kernel = torch.tensor([[kernel]], dtype = torch.float32, device = DEVICE)
-		self.kernel = kernel / kernel.sum()
-
-		self.pad = nn.ReplicationPad2d(1)
-
-
-	def forward(self, x: torch.Tensor) -> torch.Tensor:
-
-		batch_size, _, hight, width = x.shape
-
-		x = x.reshape((-1, 1, hight, width))
-		x = self.pad(x)
-		x = nn.functional.conv2d(x, self.kernel)
-
-		return x.reshape(batch_size, -1, hight, width)
-
-
 # Upsampling layer
 class Upsampling(Module):
 
-	def __init__(self, **kwargs):
+	def __init__(self, scale_factor: int = 2, **kwargs):
 
 		super().__init__(**kwargs)
 
-		self.up_sample = nn.Upsample(scale_factor = 2, mode = 'bilinear')
-		self.smooth = Smooth()
+		self.up = nn.Upsample(scale_factor = scale_factor, mode = 'nearest')
+
+		pad_sizes = [
+			int((len(BLUR_FILTER) - 1) / 2),
+			int(math.ceil((len(BLUR_FILTER) - 1) / 2)),
+			int((len(BLUR_FILTER) - 1) / 2),
+			int(math.ceil((len(BLUR_FILTER) - 1) / 2))
+		]
+
+		self.padding = nn.ReflectionPad2d(pad_sizes)
+
+		filter = torch.Tensor(BLUR_FILTER, device = DEVICE).to(dtype = torch.float32)
+		filter = filter[:, None] * filter[None, :]
+		self.filter = filter / filter.sum()
 
 
 	def forward(self, x: torch.Tensor) -> torch.Tensor:
 
-		x = self.up_sample(x)
+		x = self.up(x)
+		x = self.padding(x)
 
-		return self.smooth(x)
+		in_features = x.shape[1]
+		filter = self.filter[None, None, :, :].repeat((in_features, 1, 1, 1))
+
+		return nn.functional.conv2d(x, filter, groups = x.shape[1])
 
 
 # Downsampling layer
 class Downsampling(Module):
 
-	def __init__(self, **kwargs):
+	def __init__(self, scale_factor: int = 2, **kwargs):
 
 		super().__init__(**kwargs)
 
-		self.smooth = Smooth()
+		self.stride = scale_factor
+
+		pad_sizes = [
+			int((len(BLUR_FILTER) - 1) / 2),
+			int(math.ceil((len(BLUR_FILTER) - 1) / 2)),
+			int((len(BLUR_FILTER) - 1) / 2),
+			int(math.ceil((len(BLUR_FILTER) - 1) / 2))
+		]
+
+		self.padding = nn.ReflectionPad2d(pad_sizes)
+
+		filter = torch.Tensor(BLUR_FILTER, device = DEVICE).to(dtype = torch.float32)
+		filter = filter[:, None] * filter[None, :]
+		self.filter = filter / filter.sum()
 
 
 	def forward(self, x: torch.Tensor) -> torch.Tensor:
 
-		x = self.smooth(x)
+		x = self.padding(x)
 
-		return nn.functional.interpolate(x, scale_factor = 0.5, mode = 'bilinear')
+		in_features = x.shape[1]
+		filter = self.filter[None, None, :, :].repeat((in_features, 1, 1, 1))
+
+		return nn.functional.conv2d(x, filter, stride = self.stride, groups = in_features)
 
 
 # Minibatch standard deviation layer
