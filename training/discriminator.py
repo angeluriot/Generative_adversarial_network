@@ -18,9 +18,9 @@ class DiscriminatorBlock(Module):
 
 		self.layers = nn.Sequential(
 			EqualizedConv2D(in_features, in_features, KERNEL_SIZE),
-			nn.LeakyReLU(ALPHA),
+			LeakyReLU(),
 			EqualizedConv2D(in_features, out_features, KERNEL_SIZE, downsample = True),
-			nn.LeakyReLU(ALPHA)
+			LeakyReLU()
 		)
 
 		self.scale = 1.0 / math.sqrt(2.0)
@@ -47,7 +47,7 @@ class Discriminator(Module):
 
 		self.from_rgb = nn.Sequential(
 			EqualizedConv2D(NB_CHANNELS, self.features_list[0], kernel_size = 1),
-			nn.LeakyReLU(ALPHA)
+			LeakyReLU()
 		)
 
 		blocks = []
@@ -60,12 +60,12 @@ class Discriminator(Module):
 
 		self.conv = nn.Sequential(
 			EqualizedConv2D(self.features_list[-1] + 1, self.features_list[-1], KERNEL_SIZE),
-			nn.LeakyReLU(ALPHA)
+			LeakyReLU()
 		)
 
 		self.linear = nn.Sequential(
 			EqualizedLinear(self.features_list[-1] * MIN_RESOLUTION * MIN_RESOLUTION, self.features_list[-1]),
-			nn.LeakyReLU(ALPHA)
+			LeakyReLU()
 		)
 
 		self.final = EqualizedLinear(self.features_list[-1], 1)

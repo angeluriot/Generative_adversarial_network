@@ -43,10 +43,25 @@ class Module(nn.Module):
 				torch.nan_to_num(p.grad, nan = 0, posinf = 1e5, neginf = -1e5, out = p.grad)
 
 
+# Leaky ReLU activation function
+class LeakyReLU(Module):
+
+	def __init__(self, **kwargs):
+
+		super().__init__(**kwargs)
+
+		self.activation = nn.LeakyReLU(ALPHA)
+
+
+	def forward(self, x: torch.Tensor) -> torch.Tensor:
+
+		return self.activation(x) * ACTIVATION_GAIN
+
+
 # Blur layer
 class Blur(Module):
 
-	def __init__(self, **kwargs):
+	def __init__(self, multiplier: int = 1, **kwargs):
 
 		super().__init__(**kwargs)
 
@@ -61,7 +76,8 @@ class Blur(Module):
 
 		filter = torch.tensor(BLUR_FILTER, dtype = torch.float32, device = DEVICE)
 		filter = filter[:, None] * filter[None, :]
-		self.filter = filter / filter.sum()
+		filter = filter / filter.sum()
+		self.filter = filter * (multiplier ** 2)
 
 
 	def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -157,7 +173,7 @@ class ModulatedConv2D(Module):
 		self.gain = float(lr_multiplier) / math.sqrt(in_features * kernel_size * kernel_size)
 
 		if self.upsample:
-			self.blur = Blur()
+			self.blur = Blur(multiplier = 2)
 
 
 	def forward(self, x: torch.Tensor, style: torch.Tensor) -> torch.Tensor:
@@ -188,7 +204,7 @@ class ModulatedConv2D(Module):
 			weight = weight.reshape((batch_size * in_features_per_group, out_features // batch_size, self.kernel_size, self.kernel_size))
 
 			# Convolution
-			x = nn.functional.conv_transpose2d(x, weight * 4, stride = 2, groups = batch_size, padding = 1, output_padding = 1)
+			x = nn.functional.conv_transpose2d(x, weight, stride = 2, groups = batch_size, padding = 1, output_padding = 1)
 
 			# Reshape output
 			x = x.reshape(batch_size, -1, x.shape[2], x.shape[3])

@@ -21,7 +21,7 @@ class Mapping(Module):
 
 		for _ in range(MAPPING_LAYERS):
 			layers.append(EqualizedLinear(LATENT_DIM, LATENT_DIM, lr_multiplier = MAPPING_LR_RATIO))
-			layers.append(nn.LeakyReLU(ALPHA))
+			layers.append(LeakyReLU())
 
 		self.layers = nn.Sequential(*layers)
 
@@ -55,7 +55,7 @@ class StyleBlock(Module):
 		self.modulated_conv = ModulatedConv2D(in_features, out_features, KERNEL_SIZE, demodulate = True, upsample = upsample)
 		self.noise_scale = nn.Parameter(torch.zeros(()))
 		self.bias = nn.Parameter(torch.zeros((out_features,)))
-		self.activation = nn.LeakyReLU(ALPHA)
+		self.activation = LeakyReLU()
 
 
 	# Generate noise
@@ -317,9 +317,9 @@ class Generator(Module):
 		return torch.cat((w_1, w_2), dim = 0)
 
 
-	def forward(self, batch_size: int, style_mixing: bool = True, return_w = False):
+	def forward(self, batch_size: int, return_w = False):
 
-		if style_mixing and torch.rand(()).item() < STYLE_MIX_PROBA:
+		if torch.rand(()).item() < STYLE_MIX_PROBA:
 
 			w_1 = self.mapping(self.gen_z(batch_size))
 			w_2 = self.mapping(self.gen_z(batch_size))
