@@ -13,13 +13,13 @@ class DiscriminatorBlock(Module):
 
 		super().__init__(**kwargs)
 
-		self.down_sample = Downsampling()
+		self.downsample = Downsampling()
 		self.skip = EqualizedConv2D(in_features, out_features, kernel_size = 1, use_bias = False)
 
 		self.layers = nn.Sequential(
 			EqualizedConv2D(in_features, in_features, KERNEL_SIZE),
 			nn.LeakyReLU(ALPHA),
-			EqualizedConv2D(in_features, out_features, KERNEL_SIZE),
+			EqualizedConv2D(in_features, out_features, KERNEL_SIZE, downsample = True),
 			nn.LeakyReLU(ALPHA)
 		)
 
@@ -28,11 +28,10 @@ class DiscriminatorBlock(Module):
 
 	def forward(self, x: torch.Tensor) -> torch.Tensor:
 
-		skip = self.down_sample(x)
+		skip = self.downsample(x)
 		skip = self.skip(skip)
 
 		x = self.layers(x)
-		x = self.down_sample(x)
 
 		return (x + skip) * self.scale
 
