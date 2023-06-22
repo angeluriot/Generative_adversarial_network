@@ -30,6 +30,7 @@ DIS_MAX_FEATURES = 512 # The largest number of features in the discriminator
 
 KERNEL_SIZE = 3 # Size of the convolutional kernels
 ALPHA = 0.2 # LeakyReLU slope
+ACTIVATION_GAIN = math.sqrt(2.0) # Activation gain
 BLUR_FILTER = [1, 3, 3, 1] # Blur filter
 MINIBATCH_STD_GROUP_SIZE = 4 # Size of the groups for the minibatch standard deviation layer
 

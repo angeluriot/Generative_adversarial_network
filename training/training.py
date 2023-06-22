@@ -201,7 +201,7 @@ class Trainer():
 
 					# Forward pass
 					path_batch_size = max(1, BATCH_SIZE // PATH_LENGTH_BATCH_SHRINK)
-					fake_images, w = self.generator(path_batch_size, style_mixing = False, return_w = True)
+					fake_images, w = self.generator(path_batch_size, return_w = True)
 
 					# Path length regularization
 					self.generator.requires_grad_(False)
