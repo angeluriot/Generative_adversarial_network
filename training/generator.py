@@ -48,12 +48,12 @@ class Mapping(Module):
 # Style block
 class StyleBlock(Module):
 
-	def __init__(self, in_features: int, out_features: int, **kwargs):
+	def __init__(self, in_features: int, out_features: int, upsample: bool = False, **kwargs):
 
 		super().__init__(**kwargs)
 
 		self.to_style = EqualizedLinear(LATENT_DIM, in_features, bias_init = 1.0)
-		self.modulated_conv = ModulatedConv2D(in_features, out_features, KERNEL_SIZE, demodulate = True)
+		self.modulated_conv = ModulatedConv2D(in_features, out_features, KERNEL_SIZE, demodulate = True, upsample = upsample)
 		self.noise_scale = nn.Parameter(torch.zeros(()))
 		self.bias = nn.Parameter(torch.zeros((out_features,)))
 		self.activation = nn.LeakyReLU(ALPHA)
@@ -107,8 +107,7 @@ class SynthesisBlock(Module):
 
 		super().__init__(**kwargs)
 
-		self.up_sample = Upsampling()
-		self.style_block_1 = StyleBlock(in_features, out_features)
+		self.style_block_1 = StyleBlock(in_features, out_features, upsample = True)
 		self.style_block_2 = StyleBlock(out_features, out_features)
 		self.to_wevelet = ToWevelet(out_features)
 
@@ -121,7 +120,6 @@ class SynthesisBlock(Module):
 		if noise is None:
 			noise = [None, None]
 
-		x = self.up_sample(x)
 		x = self.style_block_1(x, w[0], noise[0])
 		x = self.style_block_2(x, w[1], noise[1])
 
@@ -147,7 +145,7 @@ class Synthesis(Module):
 			blocks.append(SynthesisBlock(self.features_list[i], self.features_list[i + 1]))
 
 		self.blocks = nn.ModuleList(blocks)
-		self.up_sample = Upsampling()
+		self.upsample = Upsampling()
 
 
 	# Generate noise
@@ -196,7 +194,7 @@ class Synthesis(Module):
 			x, new_images = block(x, w[i:i + 3], noise[i:i + 2])
 
 			images = inverse_wavelet_transform(images)
-			images = self.up_sample(images)
+			images = self.upsample(images)
 			images = discrete_wavelet_transform(images)
 			images = images + new_images
 

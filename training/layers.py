@@ -43,6 +43,37 @@ class Module(nn.Module):
 				torch.nan_to_num(p.grad, nan = 0, posinf = 1e5, neginf = -1e5, out = p.grad)
 
 
+# Blur layer
+class Blur(Module):
+
+	def __init__(self, **kwargs):
+
+		super().__init__(**kwargs)
+
+		padding = [
+			int((len(BLUR_FILTER) - 1) / 2),
+			int(math.ceil((len(BLUR_FILTER) - 1) / 2)),
+			int((len(BLUR_FILTER) - 1) / 2),
+			int(math.ceil((len(BLUR_FILTER) - 1) / 2))
+		]
+
+		self.padding = nn.ReflectionPad2d(padding)
+
+		filter = torch.tensor(BLUR_FILTER, dtype = torch.float32, device = DEVICE)
+		filter = filter[:, None] * filter[None, :]
+		self.filter = filter / filter.sum()
+
+
+	def forward(self, x: torch.Tensor) -> torch.Tensor:
+
+		x = self.padding(x)
+
+		in_features = x.shape[1]
+		filter = self.filter[None, None, :, :].repeat((in_features, 1, 1, 1))
+
+		return nn.functional.conv2d(x, filter, groups = x.shape[1])
+
+
 # Equalized learning rate linear layer
 class EqualizedLinear(Module):
 
@@ -72,13 +103,22 @@ class EqualizedLinear(Module):
 # Equalized learning rate 2D convolution layer
 class EqualizedConv2D(Module):
 
-	def __init__(self, in_features: int, out_features: int, kernel_size: int,
+	def __init__(self, in_features: int, out_features: int, kernel_size: int, downsample: bool = False,
 		use_bias: bool = True, bias_init: float = 0.0, lr_multiplier: float = 1.0, **kwargs):
 
 		super().__init__(**kwargs)
 
+		self.downsample = downsample
 		self.use_bias = use_bias
 		self.lr_multiplier = float(lr_multiplier)
+
+		if self.downsample:
+			self.blur = Blur()
+			self.stride = 2
+			self.padding = 1
+		else:
+			self.stride = 1
+			self.padding = 'same'
 
 		self.weight = nn.Parameter(torch.randn((out_features, in_features, kernel_size, kernel_size)) / self.lr_multiplier)
 
@@ -90,27 +130,34 @@ class EqualizedConv2D(Module):
 
 	def forward(self, x: torch.Tensor) -> torch.Tensor:
 
-		if self.use_bias:
-			return nn.functional.conv2d(x, self.weight * self.gain, self.bias * self.lr_multiplier, padding = 'same')
+		if self.downsample:
+			x = self.blur(x)
 
-		return nn.functional.conv2d(x, self.weight * self.gain, padding = 'same')
+		if self.use_bias:
+			return nn.functional.conv2d(x, self.weight * self.gain, self.bias * self.lr_multiplier, stride = self.stride, padding = self.padding)
+
+		return nn.functional.conv2d(x, self.weight * self.gain, stride = self.stride, padding = self.padding)
 
 
 # Modulated 2D convolution layer
 class ModulatedConv2D(Module):
 
-	def __init__(self, in_features: int, out_features: int, kernel_size: int,
-		demodulate: bool = True, epsilon: float = 1e-8, lr_multiplier: float = 1.0, **kwargs):
+	def __init__(self, in_features: int, out_features: int, kernel_size: int, demodulate: bool = True,
+		upsample: bool = False, epsilon: float = 1e-8, lr_multiplier: float = 1.0, **kwargs):
 
 		super().__init__(**kwargs)
 
 		self.in_features = in_features
 		self.kernel_size = kernel_size
 		self.demodulate = demodulate
+		self.upsample = upsample
 		self.epsilon = float(epsilon)
 
 		self.weight = nn.Parameter(torch.randn((out_features, in_features, kernel_size, kernel_size)) / float(lr_multiplier))
 		self.gain = float(lr_multiplier) / math.sqrt(in_features * kernel_size * kernel_size)
+
+		if self.upsample:
+			self.blur = Blur()
 
 
 	def forward(self, x: torch.Tensor, style: torch.Tensor) -> torch.Tensor:
@@ -130,11 +177,34 @@ class ModulatedConv2D(Module):
 		x = x.reshape((1, -1, height, width))
 		weight = weight.reshape((-1, self.in_features, self.kernel_size, self.kernel_size))
 
-		# Convolution
-		x = nn.functional.conv2d(x, weight, padding = 'same', groups = batch_size)
+		if self.upsample:
 
-		# Reshape output
-		return x.reshape(batch_size, -1, height, width)
+			# Reshape weight
+			out_features = weight.shape[0]
+			in_features_per_group  = weight.shape[1]
+
+			weight = weight.reshape((batch_size, out_features // batch_size, in_features_per_group, self.kernel_size, self.kernel_size))
+			weight = weight.transpose(1, 2)
+			weight = weight.reshape((batch_size * in_features_per_group, out_features // batch_size, self.kernel_size, self.kernel_size))
+
+			# Convolution
+			x = nn.functional.conv_transpose2d(x, weight * 4, stride = 2, groups = batch_size, padding = 1, output_padding = 1)
+
+			# Reshape output
+			x = x.reshape(batch_size, -1, x.shape[2], x.shape[3])
+
+			# Blur
+			x = self.blur(x)
+
+		else:
+
+			# Convolution
+			x = nn.functional.conv2d(x, weight, groups = batch_size, padding = 'same')
+
+			# Reshape output
+			x = x.reshape(batch_size, -1, height, width)
+
+		return x
 
 
 # Upsampling layer
@@ -144,12 +214,12 @@ class Upsampling(Module):
 
 		super().__init__(**kwargs)
 
-		self.up_sample = nn.Upsample(scale_factor = 2, mode = 'bilinear')
+		self.upsample = nn.Upsample(scale_factor = 2, mode = 'bilinear')
 
 
 	def forward(self, x: torch.Tensor) -> torch.Tensor:
 
-		return self.up_sample(x)
+		return self.upsample(x)
 
 
 # Downsampling layer

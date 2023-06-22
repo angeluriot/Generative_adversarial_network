@@ -17,7 +17,7 @@ class DiscriminatorBlock(Module):
 		self.layers = nn.Sequential(
 			EqualizedConv2D(in_features, in_features, KERNEL_SIZE),
 			nn.LeakyReLU(ALPHA),
-			EqualizedConv2D(in_features, out_features, KERNEL_SIZE),
+			EqualizedConv2D(in_features, out_features, KERNEL_SIZE, downsample = True),
 			nn.LeakyReLU(ALPHA)
 		)
 
@@ -32,7 +32,6 @@ class DiscriminatorBlock(Module):
 	def forward(self, x: torch.Tensor, images: torch.Tensor) -> torch.Tensor:
 
 		x = self.layers(x)
-		x = self.down_sample(x)
 
 		return x + self.from_wavelets(images)
 
