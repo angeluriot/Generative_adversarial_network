@@ -4,6 +4,7 @@ from torch import nn
 from training.layers import *
 from training.settings import *
 from training import utils
+from training.wavelets import *
 
 
 # Discriminator block
@@ -13,9 +14,6 @@ class DiscriminatorBlock(Module):
 
 		super().__init__(**kwargs)
 
-		self.downsample = Downsampling()
-		self.skip = EqualizedConv2D(in_features, out_features, kernel_size = 1, use_bias = False)
-
 		self.layers = nn.Sequential(
 			EqualizedConv2D(in_features, in_features, KERNEL_SIZE),
 			LeakyReLU(),
@@ -23,17 +21,19 @@ class DiscriminatorBlock(Module):
 			LeakyReLU()
 		)
 
-		self.scale = 1.0 / math.sqrt(2.0)
+		self.down_sample = Downsampling()
+
+		self.from_wavelets = nn.Sequential(
+			EqualizedConv2D(NB_CHANNELS * 4, out_features, kernel_size = 1),
+			nn.LeakyReLU(ALPHA)
+		)
 
 
-	def forward(self, x: torch.Tensor) -> torch.Tensor:
-
-		skip = self.downsample(x)
-		skip = self.skip(skip)
+	def forward(self, x: torch.Tensor, images: torch.Tensor) -> torch.Tensor:
 
 		x = self.layers(x)
 
-		return (x + skip) * self.scale
+		return x + self.from_wavelets(images)
 
 
 # Discriminator network
@@ -45,17 +45,18 @@ class Discriminator(Module):
 
 		self.features_list = utils.get_features(GEN_MIN_FEATURES, GEN_MAX_FEATURES, max_features_first = False)
 
-		self.from_rgb = nn.Sequential(
-			EqualizedConv2D(NB_CHANNELS, self.features_list[0], kernel_size = 1),
+		self.from_wavelets = nn.Sequential(
+			EqualizedConv2D(NB_CHANNELS * 4, self.features_list[1], kernel_size = 1),
 			LeakyReLU()
 		)
 
 		blocks = []
 
-		for i in range(len(self.features_list) - 1):
-			blocks.append(DiscriminatorBlock(self.features_list[i], self.features_list[i + 1]))
+		for i in range(2, len(self.features_list)):
+			blocks.append(DiscriminatorBlock(self.features_list[i - 1], self.features_list[i]))
 
-		self.blocks = nn.Sequential(*blocks)
+		self.blocks = nn.ModuleList(blocks)
+		self.down_sample = Downsampling()
 		self.mini_batch_std = MiniBatchStdDev()
 
 		self.conv = nn.Sequential(
@@ -73,8 +74,16 @@ class Discriminator(Module):
 
 	def forward(self, images: torch.Tensor) -> torch.Tensor:
 
-		x = self.from_rgb(images)
-		x = self.blocks(x)
+		images = discrete_wavelet_transform(images)
+		x = self.from_wavelets(images)
+
+		for block in self.blocks:
+
+			images = inverse_wavelet_transform(images)
+			images = self.down_sample(images)
+			images = discrete_wavelet_transform(images)
+
+			x = block(x, images)
 
 		x = self.mini_batch_std(x)
 		x = self.conv(x)
