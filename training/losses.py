@@ -31,15 +31,9 @@ def path_length(fake_images: torch.Tensor, w: torch.Tensor, mean_path_length: to
 
 
 # Discriminator fake loss
-def disc_fake_loss(fake_scores: torch.Tensor) -> torch.Tensor:
+def disc_loss(fake_scores: torch.Tensor, real_scores: torch.Tensor) -> torch.Tensor:
 
-	return nn.functional.softplus(fake_scores).mean()
-
-
-# Discriminator real loss
-def disc_real_loss(real_scores: torch.Tensor) -> torch.Tensor:
-
-	return nn.functional.softplus(-real_scores).mean()
+	return nn.functional.softplus(fake_scores).mean() + nn.functional.softplus(-real_scores).mean()
 
 
 # Gradient penalty

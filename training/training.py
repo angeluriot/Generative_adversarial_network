@@ -230,32 +230,21 @@ class Trainer():
 			# Accumulate gradients
 			for i in range(ACCUMULATION_STEPS):
 
-				# -- Fake -- #
-
-				# Forward pass
+				# Images
 				fake_images = self.generator(BATCH_SIZE)
-				fake_scores = self.discriminator(fake_images)
-
-				# Discriminator loss
-				disc_fake_loss = losses.disc_fake_loss(fake_scores)
-				print_disc_loss += disc_fake_loss.item() / ACCUMULATION_STEPS
-
-				# Backward pass
-				disc_fake_loss.backward()
-
-				# -- Real -- #
-
-				# Forward pass
 				real_images = all_real_images[i].detach()
 				real_images.requires_grad = False
+
+				# Forward pass
+				fake_scores = self.discriminator(fake_images)
 				real_scores = self.discriminator(real_images)
 
 				# Discriminator loss
-				disc_real_loss = losses.disc_real_loss(real_scores)
-				print_disc_loss += disc_real_loss.item() / ACCUMULATION_STEPS
+				disc_loss = losses.disc_loss(fake_scores, real_scores)
+				print_disc_loss += disc_loss.item() / ACCUMULATION_STEPS
 
 				# Backward pass
-				disc_real_loss.backward()
+				disc_loss.backward()
 
 			# Update weights
 			self.discriminator.clean_nan()
