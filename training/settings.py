@@ -36,7 +36,7 @@ MINIBATCH_STD_GROUP_SIZE = 4 # Size of the groups for the minibatch standard dev
 
 # ---------- Training ---------- #
 
-BATCH_SIZE = 8 # Batch size
+BATCH_SIZE = 16 # Batch size
 ACCUMULATION_STEPS = 1 # Number of accumulation steps
 
 LEARNING_RATE = 0.002 # Learning rate
