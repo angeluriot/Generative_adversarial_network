@@ -65,6 +65,9 @@ def denormalize(images: torch.Tensor) -> npt.NDArray[np.uint8]:
 # Create a grid of images from a list of images
 def create_grid(images: torch.Tensor, shape: tuple[int, int] | None = None) -> npt.NDArray[np.uint8]:
 
+	if type(images) != torch.Tensor:
+		images = torch.as_tensor(images, dtype = torch.float32, device = DEVICE)
+
 	grid = vutils.make_grid(
 		images,
 		nrow = math.ceil(math.sqrt(BATCH_SIZE)) if shape is None else shape[0],
