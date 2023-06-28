@@ -61,7 +61,10 @@ class StyleBlock(Module):
 
 	# Generate noise
 	@staticmethod
-	def gen_noise(batch_size: int, image_size: int) -> torch.Tensor:
+	def gen_noise(batch_size: int, image_size: int, same: bool = False) -> torch.Tensor:
+
+		if same:
+			return torch.randn((1, 1, image_size, image_size), device = DEVICE).repeat((batch_size, 1, 1, 1))
 
 		return torch.randn((batch_size, 1, image_size, image_size), device = DEVICE)
 
@@ -150,16 +153,16 @@ class Synthesis(Module):
 
 	# Generate noise
 	@staticmethod
-	def gen_noise(batch_size: int) -> list[torch.Tensor]:
+	def gen_noise(batch_size: int, same: bool = False) -> list[torch.Tensor]:
 
 		noise = []
 		resolution = MIN_RESOLUTION
-		noise.append(StyleBlock.gen_noise(batch_size, resolution))
+		noise.append(StyleBlock.gen_noise(batch_size, resolution, same))
 
 		for _ in range(1, NB_RESOLUTIONS):
 			resolution *= 2
-			noise.append(StyleBlock.gen_noise(batch_size, resolution))
-			noise.append(StyleBlock.gen_noise(batch_size, resolution))
+			noise.append(StyleBlock.gen_noise(batch_size, resolution, same))
+			noise.append(StyleBlock.gen_noise(batch_size, resolution, same))
 
 		return noise
 
@@ -304,9 +307,9 @@ class Generator(Module):
 
 	# Generate noise
 	@staticmethod
-	def gen_noise(batch_size: int) -> list[torch.Tensor]:
+	def gen_noise(batch_size: int, same: bool = False) -> list[torch.Tensor]:
 
-		return Synthesis.gen_noise(batch_size)
+		return Synthesis.gen_noise(batch_size, same)
 
 
 	# Mix two latent vectors W

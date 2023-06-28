@@ -36,6 +36,7 @@ This project is a deep learning model that can create high quality images from a
 * [**Pytorch**](https://pytorch.org/)
 * [**Matplotlib**](https://matplotlib.org/)
 * [**Pillow**](https://pillow.readthedocs.io/)
+* [**Scipy**](https://www.scipy.org/)
 
 <br/>
 
@@ -73,39 +74,39 @@ $ pip install -r requirements.txt
 
 # Model
 
-The model is a Generative Adversarial Network (GAN) like described in the paper [**Generative Adversarial Nets**](https://doi.org/10.48550/arXiv.1406.2661) from Université de Montréal (2014)
+The model is a Generative Adversarial Network (GAN) like described in the paper [**Generative Adversarial Nets**](https://doi.org/10.48550/arXiv.1406.2661) from **Montreal University** (2014)
 
-The generator and the discriminator are both deep convolutional neural networks like in the paper [**Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks**](https://doi.org/10.48550/arXiv.1511.06434) from Facebook AI Research (2015) but with a few improvements:
+The generator and the discriminator are both deep convolutional neural networks like in the paper [**Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks**](https://doi.org/10.48550/arXiv.1511.06434) from **Facebook AI Research** (2015) but with a few improvements:
 
 For both networks:
 
-* I added **Equalized Learning Rate Layers** from the paper [**Progressive Growing of GANs for Improved Quality, Stability, and Variation**](https://doi.org/10.48550/arXiv.1710.10196) by Nvidia (2017)
+* I added **Equalized Learning Rate Layers** from the paper [**Progressive Growing of GANs for Improved Quality, Stability, and Variation**](https://doi.org/10.48550/arXiv.1710.10196) by **Nvidia** (2017)
 
-* I added **Bilinear Upsampling / Downsampling** from the paper [**Making Convolutional Networks Shift-Invariant Again**](https://doi.org/10.48550/arXiv.1904.11486) by Adobe Research (2019)
+* I added **Bilinear Upsampling / Downsampling** from the paper [**Making Convolutional Networks Shift-Invariant Again**](https://doi.org/10.48550/arXiv.1904.11486) by **Adobe Research** (2019)
 
-* ---------- SWAGAN ----------
+* I implemented **Wavelet Transform** from the paper [**SWAGAN: A Style-based Wavelet-driven Generative Model**](https://doi.org/10.48550/arXiv.2102.06108) by **Tel-Aviv University** (2021)
 
 For the generator:
 
-* I used a **Style-Based Architecture** with a **Constant Input**, **Learned Styles** from a **Mapping Network** and **Noise Injection** from the paper [**A Style-Based Generator Architecture for Generative Adversarial Networks**](https://doi.org/10.48550/arXiv.1812.04948) by Nvidia (2018)
+* I used a **Style-Based Architecture** with a **Constant Input**, **Learned Styles** from a **Mapping Network** and **Noise Injection** from the paper [**A Style-Based Generator Architecture for Generative Adversarial Networks**](https://doi.org/10.48550/arXiv.1812.04948) by **Nvidia** (2018)
 
-* I added **Skip Connections** from the paper [**MSG-GAN: Multi-Scale Gradients for Generative Adversarial Networks**](https://doi.org/10.48550/arXiv.1903.06048) by TomTom and Adobe (2019)
+* I added **Skip Connections** from the paper [**MSG-GAN: Multi-Scale Gradients for Generative Adversarial Networks**](https://doi.org/10.48550/arXiv.1903.06048) by **TomTom** and **Adobe** (2019)
 
 For the discriminator:
 
-* I added **Residual Blocks** from the paper [**Deep Residual Learning for Image Recognition**](https://doi.org/10.48550/arXiv.1512.03385) by Microsoft Research (2015)
+* I added **Residual Blocks** from the paper [**Deep Residual Learning for Image Recognition**](https://doi.org/10.48550/arXiv.1512.03385) by **Microsoft Research** (2015)
 
-* I added **Minibatch Standard Deviation** at the end of the discriminator from the paper [**Improved Techniques for Training GANs**](https://doi.org/10.48550/arXiv.1606.03498) by OpenAI (2016)
+* I added **Minibatch Standard Deviation** at the end of the discriminator from the paper [**Improved Techniques for Training GANs**](https://doi.org/10.48550/arXiv.1606.03498) by **OpenAI** (2016)
 
 For the training:
 
-* I kept the original **Non-Saturating Loss** from the paper [**Generative Adversarial Nets**](https://doi.org/10.48550/arXiv.1406.2661) by Université de Montréal (2014)
+* I kept the original **Non-Saturating Loss** from the paper [**Generative Adversarial Nets**](https://doi.org/10.48550/arXiv.1406.2661) by **Montreal University** (2014)
 
-* I added **Path Length Regularization** on the generator from the paper [**Analyzing and Improving the Image Quality of StyleGAN**](https://doi.org/10.48550/arXiv.1912.04958) by Nvidia (2019)
+* I added **Path Length Regularization** on the generator from the paper [**Analyzing and Improving the Image Quality of StyleGAN**](https://doi.org/10.48550/arXiv.1912.04958) by **Nvidia** (2019)
 
-* I added **Gradient Penalty Regularization** on the discriminator from the paper [**Improved Training of Wasserstein GANs**](https://doi.org/10.48550/arXiv.1704.00028) by Google Brain (2017)
+* I added **Gradient Penalty Regularization** on the discriminator from the paper [**Improved Training of Wasserstein GANs**](https://doi.org/10.48550/arXiv.1704.00028) by **Google Brain** (2017)
 
-* I added **Adaptive Discriminator Augmentation (ADA)** from the paper [**Training Generative Adversarial Networks with Limited Data**](https://doi.org/10.48550/arXiv.2006.06676) by Nvidia (2020) but the augmentation probability is not trained and has to be set manually
+* I added **Adaptive Discriminator Augmentation (ADA)** from the paper [**Training Generative Adversarial Networks with Limited Data**](https://doi.org/10.48550/arXiv.2006.06676) by **Nvidia** (2020) but the augmentation probability is not trained and has to be set manually
 
 <br/>
 
