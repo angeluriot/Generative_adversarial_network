@@ -66,9 +66,17 @@ $ pip install -r requirements.txt
 
 # Testing
 
-* Specify the path to the model in the beginning of the `testing.ipynb` file
+* Run the `testing.ipynb` file to generate random images
 
-* Then, run the `testing.ipynb` file
+* Run the `testing/interpolation.ipynb` file to generate the images of a smooth interpolation video
+
+* Run the `testing/PCA.ipynb` file to find the principal components of the latent space and generate images from them
+
+* Run the `testing/projection.ipynb` file to project real images into the latent space
+
+* Run the `testing/style_mixing.ipynb` file to generate the images of a style mixing interpolation video
+
+* Run the `testing/training.ipynb` file to generate the images of a training timelapse video
 
 <br/>
 
@@ -107,6 +115,8 @@ For the training:
 * I added **Gradient Penalty Regularization** on the discriminator from the paper [**Improved Training of Wasserstein GANs**](https://doi.org/10.48550/arXiv.1704.00028) by **Google Brain** (2017)
 
 * I added **Adaptive Discriminator Augmentation (ADA)** from the paper [**Training Generative Adversarial Networks with Limited Data**](https://doi.org/10.48550/arXiv.2006.06676) by **Nvidia** (2020) but the augmentation probability is not trained and has to be set manually
+
+* I added the **Projector** of the paper [**Analyzing and Improving the Image Quality of StyleGAN**](https://doi.org/10.48550/arXiv.1912.04958) by **Nvidia** (2019)
 
 <br/>
 
