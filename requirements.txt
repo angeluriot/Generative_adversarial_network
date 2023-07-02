@@ -3,4 +3,3 @@ torchvision
 matplotlib
 pillow
 scipy
-scikit-learn

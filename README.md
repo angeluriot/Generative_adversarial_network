@@ -2,8 +2,8 @@
 
 ![Release](https://img.shields.io/badge/Release-v2.0-blueviolet)
 ![Language](https://img.shields.io/badge/Language-Python-f2cb1b)
-![Libraries](https://img.shields.io/badge/Libraries-Keras-00cf2c)
-![Size](https://img.shields.io/badge/Size-204Mo-f12222)
+![Libraries](https://img.shields.io/badge/Libraries-PyTorch-00cf2c)
+![Size](https://img.shields.io/badge/Size-125Mo-f12222)
 ![Open Source](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)
 
 <br/>
@@ -23,6 +23,7 @@ This project is a deep learning model that can create high quality images from a
 * **[Summary](#summary)**
 * **[Dependencies](#dependencies)**
 * **[Training](#training)**
+* **[Trained weights](#trained-weights)**
 * **[Testing](#testing)**
 * **[Model](#model)**
 * **[Tests](#tests)**
@@ -64,19 +65,23 @@ $ pip install -r requirements.txt
 
 <br/>
 
+# Trained weights
+
+The trained weights on multiple datasets are available on [**Google Drive**](https://drive.google.com/drive/folders/1m4Puqmb9OD8dcbgr7HStpT7QIFksJ8LR?usp=sharing), you just need to download the `.pt` files and put them in the `models` folder.
+
+<br/>
+
 # Testing
 
 * Run the `testing.ipynb` file to generate random images
 
 * Run the `testing/interpolation.ipynb` file to generate the images of a smooth interpolation video
 
-* Run the `testing/PCA.ipynb` file to find the principal components of the latent space and generate images from them
-
-* Run the `testing/projection.ipynb` file to project real images into the latent space
+* Run the `testing/projector.ipynb` file to project real images into the latent space
 
 * Run the `testing/style_mixing.ipynb` file to generate the images of a style mixing interpolation video
 
-* Run the `testing/training.ipynb` file to generate the images of a training timelapse video
+* Run the `testing/timelapse.ipynb` file to generate the images of a training timelapse video
 
 <br/>
 
@@ -122,14 +127,21 @@ For the training:
 
 # Tests
 
-<p align="center"><b>Animal faces (256*256) <a href="https://twitter.com/DIMENSION_YT/status/1621922138054688773">[see more]</a></b></p>
+<p align="center"><b>Human faces (256*256)</b></p>
+<p align="center">
+	<img src="resources/misc/faces.png" width="650">
+</p>
+
+<br/>
+
+<p align="center"><b>Animal faces (256*256)</b></p>
 <p align="center">
 	<img src="resources/misc/animals.png" width="650">
 </p>
 
 <br/>
 
-<p align="center"><b>Anime faces (256*256) <a href="https://twitter.com/DIMENSION_YT/status/1619377981159538688">[see more]</a></b></p>
+<p align="center"><b>Anime faces (256*256)</b></p>
 <p align="center">
 	<img src="resources/misc/anime.png" width="650">
 </p>
