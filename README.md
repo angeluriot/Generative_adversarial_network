@@ -111,7 +111,7 @@ The generator and the discriminator are both deep convolutional neural networks 
 
 * I added **Minibatch Standard Deviation** at the end of the discriminator from the paper [**Improved Techniques for Training GANs**](https://doi.org/10.48550/arXiv.1606.03498) by **OpenAI** (2016)
 
-### For the training:
+### For training:
 
 * I kept the original **Non-Saturating Loss** from the paper [**Generative Adversarial Nets**](https://doi.org/10.48550/arXiv.1406.2661) by **Montreal University** (2014)
 
@@ -120,6 +120,8 @@ The generator and the discriminator are both deep convolutional neural networks 
 * I added **Gradient Penalty Regularization** on the discriminator from the paper [**Improved Training of Wasserstein GANs**](https://doi.org/10.48550/arXiv.1704.00028) by **Google Brain** (2017)
 
 * I added **Adaptive Discriminator Augmentation (ADA)** from the paper [**Training Generative Adversarial Networks with Limited Data**](https://doi.org/10.48550/arXiv.2006.06676) by **Nvidia** (2020) but the augmentation probability is not trained and has to be set manually
+
+### For testing:
 
 * I added the **Projector** of the paper [**Analyzing and Improving the Image Quality of StyleGAN**](https://doi.org/10.48550/arXiv.1912.04958) by **Nvidia** (2019)
 
