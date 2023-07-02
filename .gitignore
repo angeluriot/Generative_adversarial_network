@@ -7,5 +7,5 @@ __pycache__
 /interpolation
 /style_mixing
 /timelapse
-/models
+/models/*
 !/models/README.md
