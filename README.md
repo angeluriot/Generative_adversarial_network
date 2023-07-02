@@ -123,7 +123,7 @@ The generator and the discriminator are both deep convolutional neural networks 
 
 ### For testing:
 
-* I added the **Projector** of the paper [**Analyzing and Improving the Image Quality of StyleGAN**](https://doi.org/10.48550/arXiv.1912.04958) by **Nvidia** (2019)
+* I'm currently working on a **Projector** like in the paper [**Analyzing and Improving the Image Quality of StyleGAN**](https://doi.org/10.48550/arXiv.1912.04958) by **Nvidia** (2019)...
 
 <br/>
 
