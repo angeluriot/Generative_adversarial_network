@@ -15,7 +15,7 @@ class ImageDataset(data.Dataset):
 		super().__init__(**kwargs)
 
 		self.crop = transforms.Compose([
-			transforms.Resize(IMAGE_SIZE),
+			transforms.Resize(IMAGE_SIZE, interpolation = transforms.InterpolationMode.LANCZOS),
 			transforms.CenterCrop(IMAGE_SIZE)
 		])
 
@@ -61,7 +61,7 @@ class ImageDataset(data.Dataset):
 		image = self.convert(image) * 2 - 1
 
 		if NB_CHANNELS == 2:
-			image = image[:2, :, :]
+			image = image[:2]
 
 		return image
 
