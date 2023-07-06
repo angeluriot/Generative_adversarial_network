@@ -71,11 +71,11 @@ class Trainer():
 	# Load the models
 	def load_models(self, path: str) -> None:
 
-		self.generator.load_state_dict(torch.load(os.path.join(path, 'generator.pt')))
-		self.discriminator.load_state_dict(torch.load(os.path.join(path, 'discriminator.pt')))
-		self.ma_generator.load_state_dict(torch.load(os.path.join(path, 'ma_generator.pt')))
-		self.gen_optimizer.load_state_dict(torch.load(os.path.join(path, 'gen_optimizer.pt')))
-		self.disc_optimizer.load_state_dict(torch.load(os.path.join(path, 'disc_optimizer.pt')))
+		self.generator.load_state_dict(torch.load(os.path.join(path, 'generator.pt'), map_location = DEVICE))
+		self.discriminator.load_state_dict(torch.load(os.path.join(path, 'discriminator.pt'), map_location = DEVICE))
+		self.ma_generator.load_state_dict(torch.load(os.path.join(path, 'ma_generator.pt'), map_location = DEVICE))
+		self.gen_optimizer.load_state_dict(torch.load(os.path.join(path, 'gen_optimizer.pt'), map_location = DEVICE))
+		self.disc_optimizer.load_state_dict(torch.load(os.path.join(path, 'disc_optimizer.pt'), map_location = DEVICE))
 		self.mean_path_length = torch.as_tensor(pickle.load(open(os.path.join(path, 'mean_path_length.pkl'), 'rb')), device = DEVICE)
 		self.step = pickle.load(open(os.path.join(path, 'step.pkl'), 'rb')) + 1
 		self.sample_z = pickle.load(open(os.path.join(OUTPUT_DIR, 'sample_z.pkl'), 'rb'))

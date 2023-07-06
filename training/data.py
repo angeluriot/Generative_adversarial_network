@@ -58,7 +58,7 @@ class ImageDataset(data.Dataset):
 		if flip:
 			image = image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
 
-		image = self.convert(image) * 2 - 1
+		image = self.convert(image) * 2.0 - 1.0
 
 		if NB_CHANNELS == 2:
 			image = image[:2]

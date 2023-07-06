@@ -5,6 +5,8 @@ __pycache__
 /bacup
 /test.ipynb
 /interpolation
+/projector
+/proj*
 /style_mixing
 /timelapse
 /models/*
