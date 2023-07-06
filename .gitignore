@@ -6,7 +6,8 @@ __pycache__
 /test.ipynb
 /interpolation
 /projector
-/proj*
+/projector.png
+/test.png
 /style_mixing
 /timelapse
 /models/*
