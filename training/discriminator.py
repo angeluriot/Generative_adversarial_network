@@ -5,6 +5,7 @@ from training.layers import *
 from training.settings import *
 from training import utils
 from training.wavelets import *
+import training.augmentation as ada
 
 
 # Discriminator block
@@ -72,7 +73,10 @@ class Discriminator(Module):
 		self.final = EqualizedLinear(self.features_list[-1], 1)
 
 
-	def forward(self, images: torch.Tensor) -> torch.Tensor:
+	def forward(self, images: torch.Tensor, augmentation_proba: float | None = None) -> torch.Tensor:
+
+		if augmentation_proba is not None:
+			images = ada.augment(images, augmentation_proba)
 
 		images = discrete_wavelet_transform(images)
 		x = self.from_wavelets(images)

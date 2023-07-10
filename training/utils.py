@@ -76,3 +76,19 @@ def create_grid(images: torch.Tensor, shape: tuple[int, int] | None = None) -> n
 	)
 
 	return denormalize(grid)
+
+
+# Compute the current value from a dictionary
+def get_dict_value(dictionary: dict[int | float, float], step: int | float) -> float:
+
+	keys = sorted(list(dictionary.keys()))
+
+	if step < keys[0]:
+		return dictionary[keys[0]]
+
+	for i in range(1, len(keys)):
+		if step < keys[i]:
+			lerp = (step - keys[i - 1]) / (keys[i] - keys[i - 1])
+			return (1 - lerp) * dictionary[keys[i - 1]] + lerp * dictionary[keys[i]]
+
+	return dictionary[keys[-1]]

@@ -3,11 +3,10 @@ __pycache__
 /venv
 /output
 /bacup
-/test.ipynb
+/test.*
 /interpolation
 /projector
 /projector.png
-/test.png
 /style_mixing
 /timelapse
 /models/*

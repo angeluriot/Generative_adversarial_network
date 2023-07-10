@@ -4,7 +4,7 @@ import torch
 
 # ============== Dataset ============== #
 
-DATA_DIR = 'D:/Datasets/LHQ'			# Path to the dataset
+DATA_DIR = 'D:/Datasets/AFHQ/all'		# Path to the dataset
 IMAGE_SIZE = 256						# Width and height of the images
 NB_CHANNELS = 3							# Number of channels in the images
 FLIP_DATASET = True						# Double the dataset by flipping the images
@@ -59,9 +59,14 @@ GRADIENT_PENALTY_INTERVAL = 16			# Interval of gradient penalty
 
 MA_BETA = 0.9995						# Moving average generator beta
 
-AUGMENTATION_PROBA = 0.0				# Probability of images modifications
-PIXEL_AUGMENTATION = False				# Pixel augmentation
-GEOMETRIC_AUGMENTATION = False			# Geometric augmentation
+AUGMENTATION_PROBAS = {					# Probability of images modifications during training (in epoch)
+	0.0:	0.4,
+	250.0:	0.4,
+	500.0:	0.6,
+	1000.0:	0.8
+}
+PIXEL_AUGMENTATION = True				# Pixel augmentation
+GEOMETRIC_AUGMENTATION = True			# Geometric augmentation
 
 # ============== Testing ============== #
 

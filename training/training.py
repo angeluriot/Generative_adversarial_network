@@ -44,6 +44,9 @@ class Trainer():
 
 		self.mean_path_length = torch.zeros((), device = DEVICE)
 		self.step = 0
+		self.images_seen = 0
+		self.epochs = 0.0
+		self.augmentation_proba = utils.get_dict_value(AUGMENTATION_PROBAS, 0.0)
 
 
 	# Save the models
@@ -125,10 +128,7 @@ class Trainer():
 	# Print
 	def print(self, gen_loss: float, path_length: float, disc_loss: float, grad_penalty: float) -> None:
 
-		images_seen = self.step * BATCH_SIZE * ACCUMULATION_STEPS
-		epochs = images_seen / self.dataset.size()
-
-		print(f'Steps: {self.step:,} | Images: {images_seen:,} | Epochs: {epochs:.3f}   ||   ' + \
+		print(f'Steps: {self.step:,} | Images: {self.images_seen:,} | Epochs: {self.epochs:.3f} | Augment proba: {self.augmentation_proba:.3f}   ||   ' + \
 			f'Gen loss: {gen_loss:.3f} | PPL: {path_length / PATH_LENGTH_INTERVAL:.3f} (mean: {self.mean_path_length.item():.3f})   ||   ' + \
 			f'Disc loss: {disc_loss:.4f} | Grad penalty: {grad_penalty / GRADIENT_PENALTY_INTERVAL:.4f}          ', end = '\r')
 
@@ -176,7 +176,7 @@ class Trainer():
 
 				# Forward pass
 				fake_images = self.generator(BATCH_SIZE)
-				fake_scores = self.discriminator(fake_images)
+				fake_scores = self.discriminator(fake_images, self.augmentation_proba)
 
 				# Generator loss
 				gen_loss = losses.gen_loss(fake_scores)
@@ -236,8 +236,8 @@ class Trainer():
 				real_images.requires_grad = False
 
 				# Forward pass
-				fake_scores = self.discriminator(fake_images)
-				real_scores = self.discriminator(real_images)
+				fake_scores = self.discriminator(fake_images, self.augmentation_proba)
+				real_scores = self.discriminator(real_images, self.augmentation_proba)
 
 				# Discriminator loss
 				disc_loss = losses.disc_loss(fake_scores, real_scores)
@@ -263,7 +263,7 @@ class Trainer():
 					# Forward pass
 					real_images = all_real_images[i].detach()
 					real_images.requires_grad = True
-					real_scores = self.discriminator(real_images)
+					real_scores = self.discriminator(real_images, self.augmentation_proba)
 
 					# Gradient penalty
 					self.discriminator.requires_grad_(False)
@@ -305,3 +305,6 @@ class Trainer():
 
 			# Update step
 			self.step += 1
+			self.images_seen = self.step * BATCH_SIZE * ACCUMULATION_STEPS
+			self.epochs = self.images_seen / self.dataset.size()
+			self.augmentation_proba = utils.get_dict_value(AUGMENTATION_PROBAS, self.epochs)
