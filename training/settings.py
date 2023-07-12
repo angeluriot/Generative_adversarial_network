@@ -60,10 +60,9 @@ GRADIENT_PENALTY_INTERVAL = 16			# Interval of gradient penalty
 MA_BETA = 0.9995						# Moving average generator beta
 
 AUGMENTATION_PROBAS = {					# Probability of images modifications during training (in epoch)
-	0.0:	0.4,
-	250.0:	0.4,
-	500.0:	0.6,
-	1000.0:	0.8
+	0.0:	0.0,
+	250.0:	0.6,
+	500.0:	0.8
 }
 PIXEL_AUGMENTATION = True				# Pixel augmentation
 GEOMETRIC_AUGMENTATION = True			# Geometric augmentation
