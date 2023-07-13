@@ -8,7 +8,7 @@
 
 <br/>
 
-This project is a deep learning model that can create high quality images from a random seed:
+This project is a deep convolutional generative adversarial network that can create high quality images from a random seed like portraits, animals, drawings and more.
 
 <br/>
 
