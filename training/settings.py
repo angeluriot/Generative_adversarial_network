@@ -4,7 +4,7 @@ import torch
 
 # ============== Dataset ============== #
 
-DATA_DIR = 'D:/Datasets/AFHQ/all'		# Path to the dataset
+DATA_DIR = '<Dataset path>'				# Path to the dataset
 IMAGE_SIZE = 256						# Width and height of the images
 NB_CHANNELS = 3							# Number of channels in the images
 FLIP_DATASET = True						# Double the dataset by flipping the images

@@ -11,3 +11,4 @@ __pycache__
 /timelapse
 /models/*
 !/models/README.md
+/clean.ipynb
