@@ -51,7 +51,7 @@ $ pip install -r requirements.txt
 
 # Training
 
-* First, you need to find and download a dataset of images *(less than 5,000 may be too little and more than 150,000 is not necessary)*. You can find a lot of datasets on [**Kaggle**](https://www.kaggle.com/datasets)
+* First, you need to find and download a dataset of images *(less than 5,000 may be too little and more than 150,000 is not necessary)*. You can find a lot of datasets on [**Kaggle**](https://www.kaggle.com/datasets) and the ones I used on [**my Kaggle profile**](https://www.kaggle.com/dimensi0n/datasets).
 
 * Then, in the `training/settings.py` file, specify the **path** to the dataset
 
