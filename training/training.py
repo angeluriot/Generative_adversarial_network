@@ -179,8 +179,8 @@ class Trainer():
 				fake_scores = self.discriminator(fake_images, self.augmentation_proba)
 
 				# Generator loss
-				gen_loss = losses.gen_loss(fake_scores)
-				print_gen_loss += gen_loss.item() / ACCUMULATION_STEPS
+				gen_loss = losses.gen_loss(fake_scores) / ACCUMULATION_STEPS
+				print_gen_loss += gen_loss.item()
 
 				# Backward pass
 				gen_loss.backward()
@@ -206,8 +206,9 @@ class Trainer():
 					# Path length regularization
 					self.generator.requires_grad_(False)
 					path_loss, mean_path_length = losses.path_length(fake_images, w, self.mean_path_length)
+					path_loss = path_loss / ACCUMULATION_STEPS
 					self.mean_path_length.copy_(mean_path_length.detach())
-					print_path_length += path_loss.item() / ACCUMULATION_STEPS
+					print_path_length += path_loss.item()
 
 					# Backward pass
 					self.generator.requires_grad_(True)
@@ -240,8 +241,8 @@ class Trainer():
 				real_scores = self.discriminator(real_images, self.augmentation_proba)
 
 				# Discriminator loss
-				disc_loss = losses.disc_loss(fake_scores, real_scores)
-				print_disc_loss += disc_loss.item() / ACCUMULATION_STEPS
+				disc_loss = losses.disc_loss(fake_scores, real_scores) / ACCUMULATION_STEPS
+				print_disc_loss += disc_loss.item()
 
 				# Backward pass
 				disc_loss.backward()
@@ -267,8 +268,8 @@ class Trainer():
 
 					# Gradient penalty
 					self.discriminator.requires_grad_(False)
-					grad_penalty = losses.gradient_penalty(real_images, real_scores)
-					print_grad_penalty += grad_penalty.item() / ACCUMULATION_STEPS
+					grad_penalty = losses.gradient_penalty(real_images, real_scores) / ACCUMULATION_STEPS
+					print_grad_penalty += grad_penalty.item()
 
 					# Backward pass
 					self.discriminator.requires_grad_(True)

@@ -46,16 +46,23 @@ class Module(nn.Module):
 # Leaky ReLU activation function
 class LeakyReLU(Module):
 
-	def __init__(self, **kwargs):
+	def __init__(self, gain: float = 1.0, clamp: float | None = None, **kwargs):
 
 		super().__init__(**kwargs)
 
+		self.gain = float(gain)
+		self.clamp = float(clamp) if clamp is not None else None
 		self.activation = nn.LeakyReLU(ALPHA)
 
 
 	def forward(self, x: torch.Tensor) -> torch.Tensor:
 
-		return self.activation(x) * ACTIVATION_GAIN
+		x = self.activation(x) * self.gain
+
+		if self.clamp is None:
+			return x
+
+		return torch.clamp(x, -self.clamp, self.clamp)
 
 
 # Blur layer
@@ -87,7 +94,7 @@ class Blur(Module):
 		in_features = x.shape[1]
 		filter = self.filter[None, None, :, :].repeat((in_features, 1, 1, 1))
 
-		return nn.functional.conv2d(x, filter, groups = x.shape[1])
+		return nn.functional.conv2d(x, filter.to(x.dtype), groups = x.shape[1])
 
 
 # Equalized learning rate linear layer
@@ -111,9 +118,9 @@ class EqualizedLinear(Module):
 	def forward(self, x: torch.Tensor) -> torch.Tensor:
 
 		if self.use_bias:
-			return nn.functional.linear(x, self.weight * self.gain, self.bias * self.lr_multiplier)
+			return nn.functional.linear(x, self.weight.to(x.dtype) * self.gain, self.bias.to(x.dtype) * self.lr_multiplier)
 
-		return nn.functional.linear(x, self.weight * self.gain)
+		return nn.functional.linear(x, self.weight.to(x.dtype) * self.gain)
 
 
 # Equalized learning rate 2D convolution layer
@@ -150,9 +157,9 @@ class EqualizedConv2D(Module):
 			x = self.blur(x)
 
 		if self.use_bias:
-			return nn.functional.conv2d(x, self.weight * self.gain, self.bias * self.lr_multiplier, stride = self.stride, padding = self.padding)
+			return nn.functional.conv2d(x, self.weight.to(x.dtype) * self.gain, self.bias.to(x.dtype) * self.lr_multiplier, stride = self.stride, padding = self.padding)
 
-		return nn.functional.conv2d(x, self.weight * self.gain, stride = self.stride, padding = self.padding)
+		return nn.functional.conv2d(x, self.weight.to(x.dtype) * self.gain, stride = self.stride, padding = self.padding)
 
 
 # Modulated 2D convolution layer
@@ -179,9 +186,16 @@ class ModulatedConv2D(Module):
 	def forward(self, x: torch.Tensor, style: torch.Tensor) -> torch.Tensor:
 
 		batch_size, _, height, width = x.shape
+		weight = self.weight
+
+		# Pre-normalize if float16
+		if x.dtype == torch.float16 and self.demodulate:
+
+			weight = weight * ((1.0 / math.sqrt(self.in_features * self.kernel_size * self.kernel_size)) / weight.norm(float('inf'), dim = [1, 2, 3], keepdim = True))
+			style = style / style.norm(float('inf'), dim = 1, keepdim = True)
 
 		# Modulate
-		weight = (self.weight * self.gain)[None, :, :, :, :]
+		weight = (weight * self.gain)[None, :, :, :, :]
 		weight = weight * style[:, None, :, None, None]
 
 		# Demodulate
@@ -204,7 +218,7 @@ class ModulatedConv2D(Module):
 			weight = weight.reshape((batch_size * in_features_per_group, out_features // batch_size, self.kernel_size, self.kernel_size))
 
 			# Convolution
-			x = nn.functional.conv_transpose2d(x, weight, stride = 2, groups = batch_size, padding = 1, output_padding = 1)
+			x = nn.functional.conv_transpose2d(x, weight.to(x.dtype), stride = 2, groups = batch_size, padding = 1, output_padding = 1)
 
 			# Reshape output
 			x = x.reshape(batch_size, -1, x.shape[2], x.shape[3])
@@ -215,7 +229,7 @@ class ModulatedConv2D(Module):
 		else:
 
 			# Convolution
-			x = nn.functional.conv2d(x, weight, groups = batch_size, padding = 'same')
+			x = nn.functional.conv2d(x, weight.to(x.dtype), groups = batch_size, padding = 'same')
 
 			# Reshape output
 			x = x.reshape(batch_size, -1, height, width)
@@ -266,7 +280,7 @@ class Downsampling(Module):
 		in_features = x.shape[1]
 		filter = self.filter[None, None, :, :].repeat((in_features, 1, 1, 1))
 
-		return nn.functional.conv2d(x, filter, stride = 2, groups = in_features)
+		return nn.functional.conv2d(x, filter.to(x.dtype), stride = 2, groups = in_features)
 
 
 # Minibatch standard deviation layer

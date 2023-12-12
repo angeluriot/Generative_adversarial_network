@@ -11,30 +11,30 @@ import training.augmentation as ada
 # Discriminator block
 class DiscriminatorBlock(Module):
 
-	def __init__(self, in_features: int, out_features: int, **kwargs):
+	def __init__(self, in_features: int, out_features: int, float16: bool = False, **kwargs):
 
 		super().__init__(**kwargs)
 
+		self.dtype = torch.float16 if float16 else torch.float32
+
 		self.layers = nn.Sequential(
 			EqualizedConv2D(in_features, in_features, KERNEL_SIZE),
-			LeakyReLU(),
+			LeakyReLU(ACTIVATION_GAIN, CLAMP_VALUE),
 			EqualizedConv2D(in_features, out_features, KERNEL_SIZE, downsample = True),
-			LeakyReLU()
+			LeakyReLU(1.0, CLAMP_VALUE)
 		)
-
-		self.down_sample = Downsampling()
 
 		self.from_wavelets = nn.Sequential(
 			EqualizedConv2D(NB_CHANNELS * 4, out_features, kernel_size = 1),
-			nn.LeakyReLU(ALPHA)
+			LeakyReLU(1.0, CLAMP_VALUE)
 		)
 
 
 	def forward(self, x: torch.Tensor, images: torch.Tensor) -> torch.Tensor:
 
-		x = self.layers(x)
+		x = self.layers(x.to(self.dtype))
 
-		return x + self.from_wavelets(images)
+		return x + self.from_wavelets(images.to(self.dtype))
 
 
 # Discriminator network
@@ -48,13 +48,13 @@ class Discriminator(Module):
 
 		self.from_wavelets = nn.Sequential(
 			EqualizedConv2D(NB_CHANNELS * 4, self.features_list[1], kernel_size = 1),
-			LeakyReLU()
+			LeakyReLU(ACTIVATION_GAIN, CLAMP_VALUE)
 		)
 
 		blocks = []
 
 		for i in range(2, len(self.features_list)):
-			blocks.append(DiscriminatorBlock(self.features_list[i - 1], self.features_list[i]))
+			blocks.append(DiscriminatorBlock(self.features_list[i - 1], self.features_list[i], i <= NB_FLOAT16_LAYERS + 1))
 
 		self.blocks = nn.ModuleList(blocks)
 		self.down_sample = Downsampling()
@@ -62,12 +62,12 @@ class Discriminator(Module):
 
 		self.conv = nn.Sequential(
 			EqualizedConv2D(self.features_list[-1] + 1, self.features_list[-1], KERNEL_SIZE),
-			LeakyReLU()
+			LeakyReLU(ACTIVATION_GAIN, CLAMP_VALUE)
 		)
 
 		self.linear = nn.Sequential(
 			EqualizedLinear(self.features_list[-1] * MIN_RESOLUTION * MIN_RESOLUTION, self.features_list[-1]),
-			LeakyReLU()
+			LeakyReLU(ACTIVATION_GAIN)
 		)
 
 		self.final = EqualizedLinear(self.features_list[-1], 1)
@@ -89,7 +89,7 @@ class Discriminator(Module):
 
 			x = block(x, images)
 
-		x = self.mini_batch_std(x)
+		x = self.mini_batch_std(x.to(torch.float32))
 		x = self.conv(x)
 		x = self.linear(x.flatten(1))
 

@@ -4,7 +4,7 @@ import torch
 
 # ============== Dataset ============== #
 
-DATA_DIR = '<Dataset path>'				# Path to the dataset
+DATA_DIR = 'D:/Datasets/FFHQ'			# Path to the dataset
 IMAGE_SIZE = 256						# Width and height of the images
 NB_CHANNELS = 3							# Number of channels in the images
 FLIP_DATASET = True						# Double the dataset by flipping the images
@@ -28,6 +28,8 @@ GEN_MAX_FEATURES = 512					# The largest number of features in the generator
 DIS_MIN_FEATURES = 128					# The smallest number of features in the discriminator
 DIS_MAX_FEATURES = 512					# The largest number of features in the discriminator
 
+NB_FLOAT16_LAYERS = 4					# Number of resolutions to use float16 (the last ones)
+CLAMP_VALUE = 256						# Clamping value for convolutional layers
 KERNEL_SIZE = 3							# Size of the convolutional kernels
 ALPHA = 0.2								# LeakyReLU slope
 ACTIVATION_GAIN = math.sqrt(2.0)		# Activation gain
@@ -61,11 +63,11 @@ MA_BETA = 0.9995						# Moving average generator beta
 
 AUGMENTATION_PROBAS = {					# Probability of images modifications during training (in epoch)
 	0.0:	0.0,
-	250.0:	0.6,
-	500.0:	0.8
+	250.0:	0.0,
+	500.0:	0.0
 }
-PIXEL_AUGMENTATION = True				# Pixel augmentation
-GEOMETRIC_AUGMENTATION = True			# Geometric augmentation
+PIXEL_AUGMENTATION = False				# Pixel augmentation
+GEOMETRIC_AUGMENTATION = False			# Geometric augmentation
 
 # ============== Testing ============== #
 
