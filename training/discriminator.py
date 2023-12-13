@@ -1,3 +1,5 @@
+import numpy as np
+import numpy.typing as npt
 import torch
 from torch import nn
 
@@ -5,36 +7,6 @@ from training.layers import *
 from training.settings import *
 from training import utils
 from training.wavelets import *
-import training.augmentation as ada
-
-
-# Discriminator block
-class DiscriminatorBlock(Module):
-
-	def __init__(self, in_features: int, out_features: int, **kwargs):
-
-		super().__init__(**kwargs)
-
-		self.layers = nn.Sequential(
-			EqualizedConv2D(in_features, in_features, KERNEL_SIZE),
-			LeakyReLU(),
-			EqualizedConv2D(in_features, out_features, KERNEL_SIZE, downsample = True),
-			LeakyReLU()
-		)
-
-		self.down_sample = Downsampling()
-
-		self.from_wavelets = nn.Sequential(
-			EqualizedConv2D(NB_CHANNELS * 4, out_features, kernel_size = 1),
-			nn.LeakyReLU(ALPHA)
-		)
-
-
-	def forward(self, x: torch.Tensor, images: torch.Tensor) -> torch.Tensor:
-
-		x = self.layers(x)
-
-		return x + self.from_wavelets(images)
 
 
 # Discriminator network
@@ -44,53 +16,54 @@ class Discriminator(Module):
 
 		super().__init__(**kwargs)
 
-		self.features_list = utils.get_features(GEN_MIN_FEATURES, GEN_MAX_FEATURES, max_features_first = False)
+		# 64 x 64
 
-		self.from_wavelets = nn.Sequential(
-			EqualizedConv2D(NB_CHANNELS * 4, self.features_list[1], kernel_size = 1),
-			LeakyReLU()
+		self.init = nn.Sequential(
+			Conv2d(NB_CHANNELS, 128, KERNEL_SIZE, stride = 2, padding = 1, bias = False),
+			nn.LeakyReLU(ALPHA)
 		)
 
-		blocks = []
+		# 32 x 32
 
-		for i in range(2, len(self.features_list)):
-			blocks.append(DiscriminatorBlock(self.features_list[i - 1], self.features_list[i]))
-
-		self.blocks = nn.ModuleList(blocks)
-		self.down_sample = Downsampling()
-		self.mini_batch_std = MiniBatchStdDev()
-
-		self.conv = nn.Sequential(
-			EqualizedConv2D(self.features_list[-1] + 1, self.features_list[-1], KERNEL_SIZE),
-			LeakyReLU()
+		self.block_1 = nn.Sequential(
+			Conv2d(128, 256, KERNEL_SIZE, stride = 2, padding = 1, bias = False),
+			BatchNorm2d(256),
+			nn.LeakyReLU(ALPHA)
 		)
 
-		self.linear = nn.Sequential(
-			EqualizedLinear(self.features_list[-1] * MIN_RESOLUTION * MIN_RESOLUTION, self.features_list[-1]),
-			LeakyReLU()
+		# 16 x 16
+
+		self.block_2 = nn.Sequential(
+			Conv2d(256, 512, KERNEL_SIZE, stride = 2, padding = 1, bias = False),
+			BatchNorm2d(512),
+			nn.LeakyReLU(ALPHA)
 		)
 
-		self.final = EqualizedLinear(self.features_list[-1], 1)
+		# 8 x 8
+
+		self.block_3 = nn.Sequential(
+			Conv2d(512, 1024, KERNEL_SIZE, stride = 2, padding = 1, bias = False),
+			BatchNorm2d(1024),
+			nn.LeakyReLU(ALPHA)
+		)
+
+		# 4 x 4
+
+		self.end = nn.Sequential(
+			Conv2d(1024, 1, KERNEL_SIZE, stride = 1, padding = 0, bias = False),
+			nn.Flatten(),
+			nn.Sigmoid()
+		)
+
+		# 1 x 1
 
 
-	def forward(self, images: torch.Tensor, augmentation_proba: float | None = None) -> torch.Tensor:
+	def forward(self, z: torch.Tensor) -> torch.Tensor:
 
-		if augmentation_proba is not None:
-			images = ada.augment(images, augmentation_proba)
+		x = self.init(z)
 
-		images = discrete_wavelet_transform(images)
-		x = self.from_wavelets(images)
+		x = self.block_1(x)
+		x = self.block_2(x)
+		x = self.block_3(x)
 
-		for block in self.blocks:
-
-			images = inverse_wavelet_transform(images)
-			images = self.down_sample(images)
-			images = discrete_wavelet_transform(images)
-
-			x = block(x, images)
-
-		x = self.mini_batch_std(x)
-		x = self.conv(x)
-		x = self.linear(x.flatten(1))
-
-		return self.final(x)
+		return self.end(x)

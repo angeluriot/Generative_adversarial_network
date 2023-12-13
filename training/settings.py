@@ -4,8 +4,8 @@ import torch
 
 # ============== Dataset ============== #
 
-DATA_DIR = '<Dataset path>'				# Path to the dataset
-IMAGE_SIZE = 256						# Width and height of the images
+DATA_DIR = 'D:/Datasets/FFHQ'			# Path to the dataset
+IMAGE_SIZE = 64							# Width and height of the images
 NB_CHANNELS = 3							# Number of channels in the images
 FLIP_DATASET = True						# Double the dataset by flipping the images
 NB_WORKERS = 8							# Number of workers for the dataloader
@@ -19,16 +19,16 @@ SAMPLE_SAVE_FREQUENCY = 100				# Sample save frequency (in steps)
 
 # =============== Model =============== #
 
-LATENT_DIM = 512						# Dimension of the latent space
+LATENT_DIM = 128						# Dimension of the latent space
 MAPPING_LAYERS = 8						# Number of layers in the mapping network
 
 MIN_RESOLUTION = 4						# The smallest size of convolutional layers
 GEN_MIN_FEATURES = 128					# The smallest number of features in the generator
-GEN_MAX_FEATURES = 512					# The largest number of features in the generator
+GEN_MAX_FEATURES = 1024					# The largest number of features in the generator
 DIS_MIN_FEATURES = 128					# The smallest number of features in the discriminator
-DIS_MAX_FEATURES = 512					# The largest number of features in the discriminator
+DIS_MAX_FEATURES = 1024					# The largest number of features in the discriminator
 
-KERNEL_SIZE = 3							# Size of the convolutional kernels
+KERNEL_SIZE = 4							# Size of the convolutional kernels
 ALPHA = 0.2								# LeakyReLU slope
 ACTIVATION_GAIN = math.sqrt(2.0)		# Activation gain
 BLUR_FILTER = [1, 3, 3, 1]				# Blur filter
@@ -36,13 +36,13 @@ MINIBATCH_STD_GROUP_SIZE = 4			# Size of the groups for the minibatch standard d
 
 # ============= Training ============== #
 
-BATCH_SIZE = 16							# Batch size
+BATCH_SIZE = 128						# Batch size
 ACCUMULATION_STEPS = 1					# Number of accumulation steps
 
-LEARNING_RATE = 0.002					# Learning rate
+LEARNING_RATE = 0.0002					# Learning rate
 MAPPING_LR_RATIO = 0.01					# Learning rate ratio of the mapping network
-BETA_1 = 0.0							# Adam beta 1
-BETA_2 = 0.99							# Adam beta 2
+BETA_1 = 0.5							# Adam beta 1
+BETA_2 = 0.999							# Adam beta 2
 EPSILON = 10e-8							# Adam epsilon
 
 STYLE_MIX_PROBA = 0.9					# Probability of mixing styles
