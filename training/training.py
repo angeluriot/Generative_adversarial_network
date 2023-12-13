@@ -115,8 +115,7 @@ class Trainer():
 		while True:
 
 			# Import data asynchronously
-			real_images = self.dataset.next().to(DEVICE)
-			z = self.generator.gen_z(BATCH_SIZE)
+			real_images = self.dataset.next().to(DEVICE, non_blocking = True)
 
 			print_gen_loss = 0.0
 			print_disc_loss = 0.0
@@ -140,6 +139,7 @@ class Trainer():
 			# === Fake images === #
 
 			# Forward pass
+			z = self.generator.gen_z(BATCH_SIZE)
 			fake_images = self.generator(z)
 			fake_scores = self.discriminator(fake_images.detach())
 

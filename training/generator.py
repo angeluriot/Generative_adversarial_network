@@ -19,39 +19,39 @@ class Generator(Module):
 		# 1 x 1
 
 		self.init = nn.Sequential(
-			ConvTranspose2d(LATENT_DIM, 1024, KERNEL_SIZE, stride = 1, padding = 0, bias = False),
-			BatchNorm2d(1024),
+			ConvTranspose2d(LATENT_DIM, 512, KERNEL_SIZE, stride = 1, padding = 0, bias = False),
+			BatchNorm2d(512),
 			nn.ReLU()
 		)
 
 		# 4 x 4
 
 		self.block_1 = nn.Sequential(
-			ConvTranspose2d(1024, 512, KERNEL_SIZE, stride = 2, padding = 1, bias = False),
-			BatchNorm2d(512),
+			ConvTranspose2d(512, 256, KERNEL_SIZE, stride = 2, padding = 1, bias = False),
+			BatchNorm2d(256),
 			nn.ReLU()
 		)
 
 		# 8 x 8
 
 		self.block_2 = nn.Sequential(
-			ConvTranspose2d(512, 256, KERNEL_SIZE, stride = 2, padding = 1, bias = False),
-			BatchNorm2d(256),
+			ConvTranspose2d(256, 128, KERNEL_SIZE, stride = 2, padding = 1, bias = False),
+			BatchNorm2d(128),
 			nn.ReLU()
 		)
 
 		# 16 x 16
 
 		self.block_3 = nn.Sequential(
-			ConvTranspose2d(256, 128, KERNEL_SIZE, stride = 2, padding = 1, bias = False),
-			BatchNorm2d(128),
+			ConvTranspose2d(128, 64, KERNEL_SIZE, stride = 2, padding = 1, bias = False),
+			BatchNorm2d(64),
 			nn.ReLU()
 		)
 
 		# 32 x 32
 
 		self.end = nn.Sequential(
-			ConvTranspose2d(128, NB_CHANNELS, KERNEL_SIZE, stride = 2, padding = 1, bias = False),
+			ConvTranspose2d(64, NB_CHANNELS, KERNEL_SIZE, stride = 2, padding = 1, bias = False),
 			nn.Tanh()
 		)
 
