@@ -46,26 +46,25 @@ class Module(nn.Module):
 # Convolutional layer
 class Conv2d(nn.Conv2d):
 
-	def __init__(self, in_channels: int, out_channels: int, kernel_size: int, stride: int = 1, padding: int = 0, bias: bool = True, **kwargs):
+	def __init__(self, *args, **kwargs):
 
-		super().__init__(in_channels, out_channels, kernel_size, stride, padding, bias = bias, **kwargs)
-		nn.init.normal_(self.weight.data, 0.0, 0.02)
+		super().__init__(*args, **kwargs)
+		nn.init.normal_(self.weight, 0.0, 0.02)
 
 
 # Transposed convolutional layer
 class ConvTranspose2d(nn.ConvTranspose2d):
 
-	def __init__(self, in_channels: int, out_channels: int, kernel_size: int, stride: int = 1, padding: int = 0, bias: bool = True, **kwargs):
+	def __init__(self, *args, **kwargs):
 
-		super().__init__(in_channels, out_channels, kernel_size, stride, padding, bias = bias, **kwargs)
-		nn.init.normal_(self.weight.data, 0.0, 0.02)
+		super().__init__(*args, **kwargs)
+		nn.init.normal_(self.weight, 0.0, 0.02)
 
 
 # Batch Normalization layer
 class BatchNorm2d(nn.BatchNorm2d):
 
-	def __init__(self, num_features: int, **kwargs):
+	def __init__(self, *args, **kwargs):
 
-		super().__init__(num_features, **kwargs)
-		nn.init.normal_(self.weight.data, 1.0, 0.02)
-		nn.init.constant_(self.bias.data, 0.0)
+		super().__init__(*args, **kwargs)
+		nn.init.normal_(self.weight, 1.0, 0.02)

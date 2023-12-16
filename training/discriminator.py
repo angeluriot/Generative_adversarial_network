@@ -19,14 +19,14 @@ class Discriminator(Module):
 		# 64 x 64
 
 		self.init = nn.Sequential(
-			Conv2d(NB_CHANNELS, 64, KERNEL_SIZE, stride = 2, padding = 1, bias = False),
+			Conv2d(NB_CHANNELS, 64, KERNEL_SIZE, stride = 2, padding = 1, padding_mode = 'reflect', bias = False),
 			nn.LeakyReLU(ALPHA)
 		)
 
 		# 32 x 32
 
 		self.block_1 = nn.Sequential(
-			Conv2d(64, 128, KERNEL_SIZE, stride = 2, padding = 1, bias = False),
+			Conv2d(64, 128, KERNEL_SIZE, stride = 2, padding = 1, padding_mode = 'reflect', bias = False),
 			BatchNorm2d(128),
 			nn.LeakyReLU(ALPHA)
 		)
@@ -34,7 +34,7 @@ class Discriminator(Module):
 		# 16 x 16
 
 		self.block_2 = nn.Sequential(
-			Conv2d(128, 256, KERNEL_SIZE, stride = 2, padding = 1, bias = False),
+			Conv2d(128, 256, KERNEL_SIZE, stride = 2, padding = 1, padding_mode = 'reflect', bias = False),
 			BatchNorm2d(256),
 			nn.LeakyReLU(ALPHA)
 		)
@@ -42,7 +42,7 @@ class Discriminator(Module):
 		# 8 x 8
 
 		self.block_3 = nn.Sequential(
-			Conv2d(256, 512, KERNEL_SIZE, stride = 2, padding = 1, bias = False),
+			Conv2d(256, 512, KERNEL_SIZE, stride = 2, padding = 1, padding_mode = 'reflect', bias = False),
 			BatchNorm2d(512),
 			nn.LeakyReLU(ALPHA)
 		)
@@ -50,7 +50,7 @@ class Discriminator(Module):
 		# 4 x 4
 
 		self.end = nn.Sequential(
-			Conv2d(512, 1, KERNEL_SIZE, stride = 1, padding = 0, bias = False),
+			Conv2d(512, 1, KERNEL_SIZE, stride = 1, bias = False),
 			nn.Flatten(),
 			nn.Sigmoid()
 		)
@@ -58,9 +58,9 @@ class Discriminator(Module):
 		# 1 x 1
 
 
-	def forward(self, z: torch.Tensor) -> torch.Tensor:
+	def forward(self, images: torch.Tensor) -> torch.Tensor:
 
-		x = self.init(z)
+		x = self.init(images)
 
 		x = self.block_1(x)
 		x = self.block_2(x)

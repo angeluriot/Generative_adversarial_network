@@ -106,8 +106,6 @@ class Trainer():
 	# Train the models
 	def train(self) -> None:
 
-		bce = nn.BCELoss()
-
 		self.generator.train()
 		self.discriminator.train()
 
@@ -117,38 +115,21 @@ class Trainer():
 			# Import data asynchronously
 			real_images = self.dataset.next().to(DEVICE, non_blocking = True)
 
-			print_gen_loss = 0.0
-			print_disc_loss = 0.0
-
 			# =============== TRAIN DISCRIMINATOR =============== #
 
 			self.discriminator.zero_grad()
-
-			# === Real images === #
-
-			# Forward pass
-			real_scores = self.discriminator(real_images)
-
-			# Discriminator real loss
-			disc_real_loss = bce(real_scores, torch.ones_like(real_scores))
-			print_disc_loss += disc_real_loss.item()
-
-			# Backward pass
-			disc_real_loss.backward()
-
-			# === Fake images === #
 
 			# Forward pass
 			z = self.generator.gen_z(BATCH_SIZE)
 			fake_images = self.generator(z)
 			fake_scores = self.discriminator(fake_images.detach())
+			real_scores = self.discriminator(real_images)
 
-			# Discriminator fake loss
-			disc_fake_loss = bce(fake_scores, torch.zeros_like(fake_scores))
-			print_disc_loss += disc_fake_loss.item()
+			# Discriminator loss
+			disc_loss = losses.disc_loss(fake_scores, real_scores)
 
 			# Backward pass
-			disc_fake_loss.backward()
+			disc_loss.backward()
 
 			# Update weights
 			self.discriminator.clean_nan()
@@ -162,8 +143,7 @@ class Trainer():
 			fake_scores = self.discriminator(fake_images)
 
 			# Generator loss
-			gen_loss = bce(fake_scores, torch.ones_like(fake_scores))
-			print_gen_loss += gen_loss.item()
+			gen_loss = losses.gen_loss(fake_scores)
 
 			# Backward pass
 			gen_loss.backward()
@@ -188,7 +168,7 @@ class Trainer():
 				self.save_samples([os.path.join(SAMPLES_DIR, f'sample_n-{i}_step-{self.step}.png'), os.path.join(OUTPUT_DIR, 'last_sample.png')])
 
 			# Print
-			self.print(print_gen_loss, print_disc_loss)
+			self.print(gen_loss.item(), disc_loss.item())
 
 			# Update step
 			self.step += 1
