@@ -24,7 +24,6 @@ class Generator(Module):
 			nn.ReLU()
 		)
 
-
 		# 4 x 4
 
 		self.block_1 = nn.Sequential(
