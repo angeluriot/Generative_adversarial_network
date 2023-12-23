@@ -1,10 +1,10 @@
-import os, pickle
+import os, pickle, time
 from PIL import Image
 import torch
 from torch import nn
 
 from training.settings import *
-from training import data
+from training import data, metrics
 from training.generator import *
 from training.discriminator import *
 from training import losses
@@ -47,6 +47,14 @@ class Trainer():
 		self.images_seen = 0
 		self.epochs = 0.0
 		self.augmentation_proba = utils.get_dict_value(AUGMENTATION_PROBAS, 0.0)
+		self.fid = 0.0
+		self.metrics = {
+			'steps': [],
+			'images': [],
+			'epochs': [],
+			'time': [],
+			'fid': []
+		}
 
 
 	# Save the models
@@ -69,6 +77,7 @@ class Trainer():
 			pickle.dump(self.step, open(os.path.join(p, 'step.pkl'), 'wb'))
 			pickle.dump(self.sample_z, open(os.path.join(OUTPUT_DIR, 'sample_z.pkl'), 'wb'))
 			pickle.dump(self.sample_noise, open(os.path.join(OUTPUT_DIR, 'sample_noise.pkl'), 'wb'))
+			pickle.dump(self.metrics, open(os.path.join(OUTPUT_DIR, 'metrics.pkl'), 'wb'))
 
 
 	# Load the models
@@ -83,6 +92,8 @@ class Trainer():
 		self.step = pickle.load(open(os.path.join(path, 'step.pkl'), 'rb')) + 1
 		self.sample_z = pickle.load(open(os.path.join(OUTPUT_DIR, 'sample_z.pkl'), 'rb'))
 		self.sample_noise = pickle.load(open(os.path.join(OUTPUT_DIR, 'sample_noise.pkl'), 'rb'))
+		self.metrics = pickle.load(open(os.path.join(OUTPUT_DIR, 'metrics.pkl'), 'rb'))
+		self.fid = self.metrics['fid'][-1] if len(self.metrics['fid']) > 0 else 0.0
 
 
 	# Find previous session
@@ -130,7 +141,7 @@ class Trainer():
 
 		print(f'Steps: {self.step:,} | Images: {self.images_seen:,} | Epochs: {self.epochs:.3f} | Augment proba: {self.augmentation_proba:.3f}   ||   ' + \
 			f'Gen loss: {gen_loss:.3f} | PPL: {path_length / PATH_LENGTH_INTERVAL:.3f} (mean: {self.mean_path_length.item():.3f})   ||   ' + \
-			f'Disc loss: {disc_loss:.4f} | Grad penalty: {grad_penalty / GRADIENT_PENALTY_INTERVAL:.4f}          ', end = '\r')
+			f'Disc loss: {disc_loss:.4f} | Grad penalty: {grad_penalty / GRADIENT_PENALTY_INTERVAL:.4f}   ||   FID: {self.fid:.1f}          ', end = '\r')
 
 
 	# Clear gradients
@@ -143,6 +154,8 @@ class Trainer():
 	# Train the models
 	def train(self) -> None:
 
+		last_time = time.time()
+
 		self.generator.train()
 		self.discriminator.train()
 		self.ma_generator.eval()
@@ -154,6 +167,8 @@ class Trainer():
 
 		print_path_length = 0.0
 		print_grad_penalty = 0.0
+
+		metrics.clone_dataset()
 
 		# Training loop
 		while True:
@@ -300,6 +315,21 @@ class Trainer():
 			if self.step % SAMPLE_SAVE_FREQUENCY == 0:
 				i = self.step // SAMPLE_SAVE_FREQUENCY
 				self.save_samples([os.path.join(SAMPLES_DIR, f'sample_n-{i}_step-{self.step}.png'), os.path.join(OUTPUT_DIR, 'last_sample.png')])
+
+			# Compute metrics
+			if self.step % METRICS_FREQUENCY == 0:
+
+				self.fid = metrics.compute_fid(self.ma_generator)
+
+				self.metrics['steps'].append(self.step)
+				self.metrics['images'].append(self.images_seen)
+				self.metrics['epochs'].append(self.epochs)
+				self.metrics['fid'].append(self.fid)
+
+				time_elapsed = time.time() - last_time
+				last_time = time.time()
+
+				self.metrics['time'].append(time_elapsed if len(self.metrics['time']) == 0 else self.metrics['time'][-1] + time_elapsed)
 
 			# Print
 			self.print(print_gen_loss, print_path_length, print_disc_loss, print_grad_penalty)

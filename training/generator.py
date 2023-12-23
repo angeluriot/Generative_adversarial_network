@@ -276,9 +276,9 @@ class Generator(Module):
 
 			images = torch.zeros((w.shape[-2], NB_CHANNELS, IMAGE_SIZE, IMAGE_SIZE), device = DEVICE)
 
-			for i in range(0, w.shape[-2], SYNTHESIS_BATCH_SIZE):
+			for i in range(0, w.shape[-2], TEST_BATCH_SIZE):
 
-				size = min(w.shape[-2] - i, SYNTHESIS_BATCH_SIZE)
+				size = min(w.shape[-2] - i, TEST_BATCH_SIZE)
 				w_i = w[:, i:i + size] if w.dim() == 3 else w[i:i + size]
 				n_i = [n[i:i + size] for n in noise] if noise is not None else None
 				images[i:i + size] = self.synthesis(w_i, n_i, self.mean_w, psi)
