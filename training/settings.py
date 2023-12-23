@@ -8,7 +8,7 @@ DATA_DIR = 'D:/Datasets/FFHQ'			# Path to the dataset
 IMAGE_SIZE = 64							# Width and height of the images
 NB_CHANNELS = 3							# Number of channels in the images
 FLIP_DATASET = True						# Double the dataset by flipping the images
-NB_WORKERS = 8							# Number of workers for the dataloader
+NB_WORKERS = 16							# Number of workers for the dataloader
 
 # ============== Outputs ============== #
 
@@ -67,11 +67,19 @@ AUGMENTATION_PROBAS = {					# Probability of images modifications during trainin
 PIXEL_AUGMENTATION = True				# Pixel augmentation
 GEOMETRIC_AUGMENTATION = True			# Geometric augmentation
 
+# ============== Metrics ============== #
+
+METRICS_FREQUENCY = 1_000				# FID computation frequency (in steps)
+
+FID_BATCH_SIZE = 64						# Batch size for FID computation
+FID_NB_SAMPLES = 50_000					# Number of samples to compute the FID
+FID_DIMS = 2_048						# Dimension of the FID
+
 # ============== Testing ============== #
 
 MEAN_W_SAMPLES = 10_000					# Number of samples to compute the mean W
-MAPPING_BATCH_SIZE = 1000				# Batch size for the mapping network in testing
-SYNTHESIS_BATCH_SIZE = BATCH_SIZE * 2	# Batch size for the synthesis network in testing
+MAPPING_BATCH_SIZE = 1_000				# Batch size for the mapping network in testing
+TEST_BATCH_SIZE = BATCH_SIZE * 4		# Batch size for the synthesis network in testing
 
 # ============ Calculated ============= #
 
@@ -80,6 +88,8 @@ DEVICE_NAME = 'cuda:0' if GPU_ENABLED else 'cpu'
 DEVICE = torch.device(DEVICE_NAME)
 SAMPLES_DIR = os.path.join(OUTPUT_DIR, 'images')
 MODELS_DIR = os.path.join(OUTPUT_DIR, 'models')
+FID_REAL_DIR = os.path.join(OUTPUT_DIR, 'fid', 'reals')
+FID_FAKE_DIR = os.path.join(OUTPUT_DIR, 'fid', 'fakes')
 MARGIN = IMAGE_SIZE // 8
 NB_RESOLUTIONS = int(math.log(IMAGE_SIZE, 2)) - int(math.log(MIN_RESOLUTION, 2)) + 1
 NB_W = 2 * NB_RESOLUTIONS - 2
