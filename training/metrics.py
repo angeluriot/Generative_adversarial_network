@@ -3,6 +3,7 @@ import numpy as np
 import numpy.typing as npt
 from PIL import Image
 from pytorch_fid.fid_score import calculate_fid_given_paths
+from IPython.utils import io
 
 from training.generator import Generator
 from training.settings import *
@@ -90,4 +91,7 @@ def compute_fid(generator: Generator) -> float:
 	for t in threads:
 		t.join()
 
-	return calculate_fid_given_paths([FID_REAL_DIR, FID_FAKE_DIR], FID_BATCH_SIZE, DEVICE, FID_DIMS, NB_WORKERS)
+	with io.capture_output():
+		fid = calculate_fid_given_paths([FID_REAL_DIR, FID_FAKE_DIR], FID_BATCH_SIZE, DEVICE, FID_DIMS, NB_WORKERS)
+
+	return fid
