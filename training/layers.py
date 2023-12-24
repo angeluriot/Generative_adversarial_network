@@ -43,6 +43,15 @@ class Module(nn.Module):
 				torch.nan_to_num(p.grad, nan = 0, posinf = 1e5, neginf = -1e5, out = p.grad)
 
 
+# Linear layer
+class Linear(nn.Linear):
+
+	def __init__(self, *args, **kwargs):
+
+		super().__init__(*args, **kwargs)
+		nn.init.normal_(self.weight, 0.0, 0.02)
+
+
 # Convolutional layer
 class Conv2d(nn.Conv2d):
 
@@ -59,6 +68,15 @@ class ConvTranspose2d(nn.ConvTranspose2d):
 
 		super().__init__(*args, **kwargs)
 		nn.init.normal_(self.weight, 0.0, 0.02)
+
+
+# Batch Normalization layer
+class BatchNorm1d(nn.BatchNorm1d):
+
+	def __init__(self, *args, **kwargs):
+
+		super().__init__(*args, **kwargs)
+		nn.init.normal_(self.weight, 1.0, 0.02)
 
 
 # Batch Normalization layer

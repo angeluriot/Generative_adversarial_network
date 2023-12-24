@@ -19,8 +19,8 @@ class Generator(Module):
 		# 1 x 1
 
 		self.init = nn.Sequential(
-			ConvTranspose2d(LATENT_DIM, 1024, KERNEL_SIZE, stride = 1, padding = 0, bias = False),
-			BatchNorm2d(1024),
+			Linear(LATENT_DIM, 4 * 4 * 1024, bias = False),
+			BatchNorm1d(4 * 4 * 1024),
 			nn.ReLU()
 		)
 
@@ -86,7 +86,7 @@ class Generator(Module):
 
 	def forward(self, z: torch.Tensor) -> torch.Tensor:
 
-		x = self.init(z.reshape((-1, LATENT_DIM, 1, 1)))
+		x = self.init(z).reshape((-1, 1024, 4, 4))
 
 		x = self.block_1(x)
 		x = self.block_2(x)

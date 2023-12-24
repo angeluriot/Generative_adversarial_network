@@ -50,8 +50,8 @@ class Discriminator(Module):
 		# 4 x 4
 
 		self.end = nn.Sequential(
-			Conv2d(512, 1, KERNEL_SIZE, stride = 1, bias = False),
 			nn.Flatten(),
+			Linear(4 * 4 * 512, 1),
 			nn.Sigmoid()
 		)
 
