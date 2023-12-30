@@ -27,8 +27,13 @@ def clone_dataset() -> None:
 		return
 
 	def process_image(input_path: str, output_path: str) -> None:
+
 		image = Image.open(input_path)
 		image = image.resize((IMAGE_SIZE, IMAGE_SIZE), Image.Resampling.LANCZOS)
+
+		if FLIP_DATASET and random.random() < 0.5:
+			image = image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+
 		image.save(output_path)
 
 	nb = 0
