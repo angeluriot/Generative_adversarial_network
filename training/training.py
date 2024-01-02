@@ -140,7 +140,7 @@ class Trainer():
 
 		print(f'Steps: {self.step:,} | Images: {self.images_seen:,} | Epochs: {self.epochs:.3f} | Augment proba: {self.augmentation_proba:.3f}   ||   ' + \
 			f'Gen loss: {gen_loss:.3f} | PPL: {path_length / PATH_LENGTH_INTERVAL:.3f} (mean: {self.mean_path_length.item():.3f})   ||   ' + \
-			f'Disc loss: {disc_loss:.4f} | Grad penalty: {grad_penalty / GRADIENT_PENALTY_INTERVAL:.4f}   ||   FID: {self.fid:.1f}          ', end = '\r')
+			f'Disc loss: {disc_loss:.4f} | Grad penalty: {grad_penalty / GRADIENT_PENALTY_INTERVAL:.4f}   ||   FID: {self.fid:.2f}          ', end = '\r')
 
 
 	# Clear gradients

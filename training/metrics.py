@@ -14,9 +14,6 @@ def clone_dataset() -> None:
 	files = os.listdir(DATA_DIR)
 	random.shuffle(files)
 
-	if Image.open(os.path.join(DATA_DIR, files[0])).size == (IMAGE_SIZE, IMAGE_SIZE):
-		return
-
 	if not os.path.exists(FID_REAL_DIR):
 		os.makedirs(FID_REAL_DIR)
 
