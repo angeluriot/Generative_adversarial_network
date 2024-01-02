@@ -44,7 +44,6 @@ class Trainer():
 			'steps': [],
 			'images': [],
 			'epochs': [],
-			'time': [],
 			'fid': []
 		}
 
@@ -111,13 +110,11 @@ class Trainer():
 	def print(self, gen_loss: float, disc_loss: float) -> None:
 
 		print(f'Steps: {self.step:,} | Images: {self.images_seen:,} | Epochs: {self.epochs:.3f} | Augment proba: {self.augmentation_proba:.3f}   ||   ' + \
-			f'Gen loss: {gen_loss:.3f}   ||   Disc loss: {disc_loss:.4f}   ||   FID: {self.fid:.1f}          ', end = '\r')
+			f'Gen loss: {gen_loss:.3f}   ||   Disc loss: {disc_loss:.4f}   ||   FID: {self.fid:.2f}          ', end = '\r')
 
 
 	# Train the models
 	def train(self) -> None:
-
-		last_time = time.time()
 
 		self.generator.train()
 		self.discriminator.train()
@@ -169,19 +166,6 @@ class Trainer():
 
 			# ======================================== #
 
-			# Save models
-			if self.step % MODEL_SAVE_FREQUENCY == 0:
-				i = self.step // MODEL_SAVE_FREQUENCY
-				self.save_models(os.path.join(MODELS_DIR, f'model_n-{i}_step-{self.step}'))
-
-			if self.step % min(MODEL_SAVE_FREQUENCY, SAMPLE_SAVE_FREQUENCY) == 0:
-				self.save_models(os.path.join(OUTPUT_DIR, 'last_model'))
-
-			# Save samples
-			if self.step % SAMPLE_SAVE_FREQUENCY == 0:
-				i = self.step // SAMPLE_SAVE_FREQUENCY
-				self.save_samples([os.path.join(SAMPLES_DIR, f'sample_n-{i}_step-{self.step}.png'), os.path.join(OUTPUT_DIR, 'last_sample.png')])
-
 			# Compute metrics
 			if self.step % METRICS_FREQUENCY == 0:
 
@@ -192,10 +176,18 @@ class Trainer():
 				self.metrics['epochs'].append(self.epochs)
 				self.metrics['fid'].append(self.fid)
 
-				time_elapsed = time.time() - last_time
-				last_time = time.time()
+			# Save models
+			if self.step % MODEL_SAVE_FREQUENCY == 0:
+				i = self.step // MODEL_SAVE_FREQUENCY
+				self.save_models(os.path.join(MODELS_DIR, f'model_n-{i}_step-{self.step}'))
 
-				self.metrics['time'].append(time_elapsed if len(self.metrics['time']) == 0 else self.metrics['time'][-1] + time_elapsed)
+			if self.step % MODEL_SAVE_FREQUENCY == 0 or self.step % SAMPLE_SAVE_FREQUENCY == 0:
+				self.save_models(os.path.join(OUTPUT_DIR, 'last_model'))
+
+			# Save samples
+			if self.step % SAMPLE_SAVE_FREQUENCY == 0:
+				i = self.step // SAMPLE_SAVE_FREQUENCY
+				self.save_samples([os.path.join(SAMPLES_DIR, f'sample_n-{i}_step-{self.step}.png'), os.path.join(OUTPUT_DIR, 'last_sample.png')])
 
 			# Print
 			self.print(gen_loss.item(), disc_loss.item())
