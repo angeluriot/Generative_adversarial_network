@@ -4,7 +4,7 @@ import torch
 
 # ============== Dataset ============== #
 
-DATA_DIR = 'D:/Datasets/FFHQ'			# Path to the dataset
+DATA_DIR = 'D:/Datasets/AFHQ/all'			# Path to the dataset
 IMAGE_SIZE = 256						# Width and height of the images
 NB_CHANNELS = 3							# Number of channels in the images
 FLIP_DATASET = True						# Double the dataset by flipping the images
@@ -16,6 +16,7 @@ OUTPUT_DIR = './output'					# Path to the output directory
 OUTPUT_SHAPE = (8, 8)					# Shape of the output image (columns, rows)
 MODEL_SAVE_FREQUENCY = 1000				# Model save frequency (in steps)
 SAMPLE_SAVE_FREQUENCY = 100				# Sample save frequency (in steps)
+SAMPLE_PSI = 0.7						# Psi value for sample generation
 
 # =============== Model =============== #
 
@@ -38,7 +39,7 @@ MINIBATCH_STD_GROUP_SIZE = 4			# Size of the groups for the minibatch standard d
 
 # ============= Training ============== #
 
-BATCH_SIZE = 16							# Batch size
+BATCH_SIZE = 32							# Batch size
 ACCUMULATION_STEPS = 1					# Number of accumulation steps
 
 LEARNING_RATE = 0.002					# Learning rate
@@ -63,11 +64,10 @@ MA_BETA = 0.9995						# Moving average generator beta
 
 AUGMENTATION_PROBAS = {					# Probability of images modifications during training (in epoch)
 	0.0:	0.0,
-	250.0:	0.0,
-	500.0:	0.0
+	500.0:	0.6
 }
-PIXEL_AUGMENTATION = False				# Pixel augmentation
-GEOMETRIC_AUGMENTATION = False			# Geometric augmentation
+PIXEL_AUGMENTATION = True				# Pixel augmentation
+GEOMETRIC_AUGMENTATION = True			# Geometric augmentation
 
 # ============== Metrics ============== #
 
@@ -79,9 +79,9 @@ FID_DIMS = 2_048						# Dimension of the FID
 
 # ============== Testing ============== #
 
-MEAN_W_SAMPLES = 10_000					# Number of samples to compute the mean W
+MEAN_W_SAMPLES = 100_000				# Number of samples to compute the mean W
 MAPPING_BATCH_SIZE = 1_000				# Batch size for the mapping network in testing
-TEST_BATCH_SIZE = BATCH_SIZE * 4		# Batch size for testing
+TEST_BATCH_SIZE = BATCH_SIZE * 2		# Batch size for testing
 
 # ============ Calculated ============= #
 

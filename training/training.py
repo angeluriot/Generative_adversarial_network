@@ -108,7 +108,8 @@ class Trainer():
 		if type(path) == str:
 			path = [path]
 
-		images = self.ma_generator.z_to_images(self.sample_z, self.sample_noise)
+		self.ma_generator.compute_mean_w()
+		images = self.ma_generator.z_to_images(self.sample_z, self.sample_noise, psi = SAMPLE_PSI)
 		images = utils.create_grid(images, OUTPUT_SHAPE)
 		images = Image.fromarray(images)
 
