@@ -4,7 +4,7 @@ import torch
 
 # ============== Dataset ============== #
 
-DATA_DIR = 'D:/Datasets/AFHQ/all'			# Path to the dataset
+DATA_DIR = '<Dataset path>'		# Path to the dataset
 IMAGE_SIZE = 256						# Width and height of the images
 NB_CHANNELS = 3							# Number of channels in the images
 FLIP_DATASET = True						# Double the dataset by flipping the images
@@ -19,6 +19,8 @@ SAMPLE_SAVE_FREQUENCY = 100				# Sample save frequency (in steps)
 SAMPLE_PSI = 0.7						# Psi value for sample generation
 
 # =============== Model =============== #
+
+START_MODEL = None						# Path to the model to load at the start of the training
 
 LATENT_DIM = 512						# Dimension of the latent space
 MAPPING_LAYERS = 8						# Number of layers in the mapping network

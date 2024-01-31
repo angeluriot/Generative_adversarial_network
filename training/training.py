@@ -80,7 +80,7 @@ class Trainer():
 
 
 	# Load the models
-	def load_models(self, path: str) -> None:
+	def load_models(self, path: str, start = False) -> None:
 
 		self.generator.load_state_dict(torch.load(os.path.join(path, 'generator.pt'), map_location = DEVICE))
 		self.discriminator.load_state_dict(torch.load(os.path.join(path, 'discriminator.pt'), map_location = DEVICE))
@@ -88,11 +88,13 @@ class Trainer():
 		self.gen_optimizer.load_state_dict(torch.load(os.path.join(path, 'gen_optimizer.pt'), map_location = DEVICE))
 		self.disc_optimizer.load_state_dict(torch.load(os.path.join(path, 'disc_optimizer.pt'), map_location = DEVICE))
 		self.mean_path_length = torch.as_tensor(pickle.load(open(os.path.join(path, 'mean_path_length.pkl'), 'rb')), device = DEVICE)
-		self.step = pickle.load(open(os.path.join(path, 'step.pkl'), 'rb')) + 1
-		self.sample_z = pickle.load(open(os.path.join(OUTPUT_DIR, 'sample_z.pkl'), 'rb'))
-		self.sample_noise = pickle.load(open(os.path.join(OUTPUT_DIR, 'sample_noise.pkl'), 'rb'))
-		self.metrics = pickle.load(open(os.path.join(OUTPUT_DIR, 'metrics.pkl'), 'rb'))
-		self.fid = self.metrics['fid'][-1] if len(self.metrics['fid']) > 0 else 0.0
+
+		if not start:
+			self.step = pickle.load(open(os.path.join(path, 'step.pkl'), 'rb')) + 1
+			self.sample_z = pickle.load(open(os.path.join(OUTPUT_DIR, 'sample_z.pkl'), 'rb'))
+			self.sample_noise = pickle.load(open(os.path.join(OUTPUT_DIR, 'sample_noise.pkl'), 'rb'))
+			self.metrics = pickle.load(open(os.path.join(OUTPUT_DIR, 'metrics.pkl'), 'rb'))
+			self.fid = self.metrics['fid'][-1] if len(self.metrics['fid']) > 0 else 0.0
 
 
 	# Find previous session
@@ -100,6 +102,8 @@ class Trainer():
 
 		if os.path.exists(os.path.join(OUTPUT_DIR, 'last_model')):
 			self.load_models(os.path.join(OUTPUT_DIR, 'last_model'))
+		elif START_MODEL is not None:
+			self.load_models(START_MODEL, start = True)
 
 
 	# Save samples
