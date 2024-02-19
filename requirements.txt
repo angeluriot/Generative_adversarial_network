@@ -4,3 +4,4 @@ matplotlib
 pillow
 scipy
 psutil
+pytorch-fid

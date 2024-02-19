@@ -1,6 +1,6 @@
 # Generative Adversarial Network (GAN)
 
-![Release](https://img.shields.io/badge/Release-v2.0-blueviolet)
+![Release](https://img.shields.io/badge/Release-v2.1-blueviolet)
 ![Language](https://img.shields.io/badge/Language-Python-f2cb1b)
 ![Libraries](https://img.shields.io/badge/Libraries-PyTorch-00cf2c)
 ![Size](https://img.shields.io/badge/Size-12Mo-f12222)
@@ -34,10 +34,12 @@ This project is a deep convolutional generative adversarial network that can cre
 # Dependencies
 
 * [**Python**](https://www.python.org/)
-* [**Pytorch**](https://pytorch.org/)
+* [**PyTorch**](https://pytorch.org/)
 * [**Matplotlib**](https://matplotlib.org/)
 * [**Pillow**](https://pillow.readthedocs.io/)
 * [**Scipy**](https://www.scipy.org/)
+* [**PSUtil**](https://github.com/giampaolo/psutil)
+* [**PyTorch FID**](https://github.com/mseitzer/pytorch-fid)
 
 <br/>
 
@@ -45,13 +47,13 @@ Run the following command to install the dependencies:
 ```shell
 $ pip install -r requirements.txt
 ```
-*(You may need to use a [**specific command**](https://pytorch.org/get-started/locally/) for Pytorch if you want to use CUDA)*
+*(You may need to use a [**specific command**](https://pytorch.org/get-started/locally/) for PyTorch if you want to use CUDA)*
 
 <br/>
 
 # Training
 
-* First, you need to find and download a dataset of images *(less than 5,000 may be too little and more than 150,000 is not necessary)*. You can find a lot of datasets on [**Kaggle**](https://www.kaggle.com/datasets) and the ones I used on [**my Kaggle profile**](https://www.kaggle.com/dimensi0n/datasets).
+* First, you need to find and download a dataset of images *(less than 5,000 may be too little and more than 150,000 is not necessary)*. You can find a lot of datasets on [**Kaggle**](https://www.kaggle.com/datasets) and the ones I used on [**my Google Drive**](https://drive.google.com/drive/u/1/folders/15nmil1s50AKEL4PvNPsZ1VSGC_jGGLGE).
 
 * Then, in the `training/settings.py` file, specify the **path** to the dataset
 
@@ -123,29 +125,38 @@ The generator and the discriminator are both deep convolutional neural networks 
 
 ### For testing:
 
+* I added the computation of the **Fréchet Inception Distance (FID)** during training from the paper [**GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium**](https://doi.org/10.48550/arXiv.1706.08500) by **University Linz** (2017) using the **pytorch-fid** module
+
 * I added a **Projector** like in the paper [**Analyzing and Improving the Image Quality of StyleGAN**](https://doi.org/10.48550/arXiv.1912.04958) by **Nvidia** (2019)
 
 <br/>
 
 # Tests
 
-<p align="center"><b>Human faces (256*256)</b></p>
+<p align="center"><b>Human faces 256*256 (FID: 5.97)</b></p>
 <p align="center">
 	<img src="resources/misc/faces.png" width="650">
 </p>
 
 <br/>
 
-<p align="center"><b>Animal faces (256*256)</b></p>
+<p align="center"><b>Animal faces 256*256 (FID: 6.56)</b></p>
 <p align="center">
 	<img src="resources/misc/animals.png" width="650">
 </p>
 
 <br/>
 
-<p align="center"><b>Anime faces (256*256)</b></p>
+<p align="center"><b>Anime faces 256*256 (FID: 3.74)</b></p>
 <p align="center">
 	<img src="resources/misc/anime.png" width="650">
+</p>
+
+<br/>
+
+<p align="center"><b>Painting faces 256*256 (FID: 20.32)</b></p>
+<p align="center">
+	<img src="resources/misc/paintings.png" width="650">
 </p>
 
 <br/>

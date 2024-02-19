@@ -22,7 +22,7 @@ class Mapping(Module):
 
 		for _ in range(MAPPING_LAYERS):
 			layers.append(EqualizedLinear(LATENT_DIM, LATENT_DIM, lr_multiplier = MAPPING_LR_RATIO))
-			layers.append(LeakyReLU())
+			layers.append(LeakyReLU(ACTIVATION_GAIN))
 
 		self.layers = nn.Sequential(*layers)
 
@@ -48,15 +48,16 @@ class Mapping(Module):
 # Style block
 class StyleBlock(Module):
 
-	def __init__(self, in_features: int, out_features: int, upsample: bool = False, **kwargs):
+	def __init__(self, in_features: int, out_features: int, upsample: bool = False, float16: bool = False, **kwargs):
 
 		super().__init__(**kwargs)
 
+		self.dtype = torch.float16 if float16 else torch.float32
 		self.to_style = EqualizedLinear(LATENT_DIM, in_features, bias_init = 1.0)
 		self.modulated_conv = ModulatedConv2D(in_features, out_features, KERNEL_SIZE, demodulate = True, upsample = upsample)
 		self.noise_scale = nn.Parameter(torch.zeros(()))
 		self.bias = nn.Parameter(torch.zeros((out_features,)))
-		self.activation = LeakyReLU()
+		self.activation = LeakyReLU(ACTIVATION_GAIN, CLAMP_VALUE)
 
 
 	# Generate noise
@@ -72,13 +73,13 @@ class StyleBlock(Module):
 	def forward(self, x: torch.Tensor, w: torch.Tensor, noise: torch.Tensor | None = None) -> torch.Tensor:
 
 		style = self.to_style(w)
-		x = self.modulated_conv(x, style)
+		x = self.modulated_conv(x.to(self.dtype), style)
 
 		if noise is None:
 			noise = self.gen_noise(x.shape[0], x.shape[2])
 
-		x = x + self.noise_scale * noise
-		x = x + self.bias[None, :, None, None]
+		x = x + (self.noise_scale * noise).to(self.dtype)
+		x = x + self.bias[None, :, None, None].to(self.dtype)
 
 		return self.activation(x)
 
@@ -86,10 +87,11 @@ class StyleBlock(Module):
 # To wevelet block
 class ToWevelet(Module):
 
-	def __init__(self, in_features: int, **kwargs):
+	def __init__(self, in_features: int, float16: bool = False, **kwargs):
 
 		super().__init__(**kwargs)
 
+		self.dtype = torch.float16 if float16 else torch.float32
 		self.to_style = EqualizedLinear(LATENT_DIM, in_features, bias_init = 1.0)
 		self.modulated_conv = ModulatedConv2D(in_features, NB_CHANNELS * 4, KERNEL_SIZE, demodulate = False)
 		self.bias = nn.Parameter(torch.zeros((NB_CHANNELS * 4,)))
@@ -98,21 +100,25 @@ class ToWevelet(Module):
 	def forward(self, x: torch.Tensor, w: torch.Tensor) -> torch.Tensor:
 
 		style = self.to_style(w)
-		x = self.modulated_conv(x, style)
+		x = self.modulated_conv(x.to(self.dtype), style)
+		x = x + self.bias[None, :, None, None].to(self.dtype)
 
-		return x + self.bias[None, :, None, None]
+		if CLAMP_VALUE is None:
+			return x
+
+		return x.clamp(-CLAMP_VALUE, CLAMP_VALUE)
 
 
 # Synthesis block
 class SynthesisBlock(Module):
 
-	def __init__(self, in_features: int, out_features: int, **kwargs):
+	def __init__(self, in_features: int, out_features: int, float16: bool = False, **kwargs):
 
 		super().__init__(**kwargs)
 
-		self.style_block_1 = StyleBlock(in_features, out_features, upsample = True)
-		self.style_block_2 = StyleBlock(out_features, out_features)
-		self.to_wevelet = ToWevelet(out_features)
+		self.style_block_1 = StyleBlock(in_features, out_features, upsample = True, float16 = float16)
+		self.style_block_2 = StyleBlock(out_features, out_features, float16 = float16)
+		self.to_wevelet = ToWevelet(out_features, float16 = float16)
 
 
 	def forward(self, x: torch.Tensor, w: torch.Tensor, noise: list[torch.Tensor] | None = None) -> torch.Tensor:
@@ -128,7 +134,7 @@ class SynthesisBlock(Module):
 
 		images = self.to_wevelet(x, w[2])
 
-		return x, images
+		return x, images.to(torch.float32)
 
 
 # Synthesis network
@@ -145,7 +151,7 @@ class Synthesis(Module):
 		blocks = []
 
 		for i in range(len(self.features_list) - 2):
-			blocks.append(SynthesisBlock(self.features_list[i], self.features_list[i + 1]))
+			blocks.append(SynthesisBlock(self.features_list[i], self.features_list[i + 1], float16 = i >= len(self.features_list) - 2 - NB_FLOAT16_LAYERS))
 
 		self.blocks = nn.ModuleList(blocks)
 		self.upsample = Upsampling()
@@ -270,9 +276,9 @@ class Generator(Module):
 
 			images = torch.zeros((w.shape[-2], NB_CHANNELS, IMAGE_SIZE, IMAGE_SIZE), device = DEVICE)
 
-			for i in range(0, w.shape[-2], SYNTHESIS_BATCH_SIZE):
+			for i in range(0, w.shape[-2], TEST_BATCH_SIZE):
 
-				size = min(w.shape[-2] - i, SYNTHESIS_BATCH_SIZE)
+				size = min(w.shape[-2] - i, TEST_BATCH_SIZE)
 				w_i = w[:, i:i + size] if w.dim() == 3 else w[i:i + size]
 				n_i = [n[i:i + size] for n in noise] if noise is not None else None
 				images[i:i + size] = self.synthesis(w_i, n_i, self.mean_w, psi)
