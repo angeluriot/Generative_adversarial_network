@@ -66,14 +66,14 @@ MA_BETA = 0.9995						# Moving average generator beta
 
 AUGMENTATION_PROBAS = {					# Probability of images modifications during training (in epoch)
 	0.0:	0.0,
-	500.0:	0.6
+	500.0:	0.5
 }
 PIXEL_AUGMENTATION = True				# Pixel augmentation
 GEOMETRIC_AUGMENTATION = True			# Geometric augmentation
 
 # ============== Metrics ============== #
 
-METRICS_FREQUENCY = 5_000				# FID computation frequency (in steps)
+METRICS_FREQUENCY = 5_000				# Metrics computation frequency (in steps)
 
 FID_BATCH_SIZE = 64						# Batch size for FID computation
 FID_NB_SAMPLES = 50_000					# Number of samples to compute the FID
