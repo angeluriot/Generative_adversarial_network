@@ -21,75 +21,24 @@ This project is a deep convolutional generative adversarial network that can cre
 # 📋 Summary
 
 * **[📋 Summary](#-summary)**
+* **[🤖 Model](#-model)**
+	* [🏗️ Architecture](#%EF%B8%8F-architecture)
+	* [🧪 Tests](#-tests)
+	* [🎛️ Trained weights](#%EF%B8%8F-trained-weights)
 * **[📦 Dependencies](#-dependencies)**
 * **[🦾 Training](#-training)**
-* **[🎛️ Trained weights](#-trained-weights)**
-* **[⚗️ Testing](#-testing)**
-* **[🤖 Model](#-model)**
-* **[🧪 Tests](#-tests)**
+* **[⚗️ Testing](#%EF%B8%8F-testing)**
 * **[🙏 Credits](#-credits)**
-
-<br/>
-
-# 📦 Dependencies
-
-* [**Python**](https://www.python.org/)
-* [**PyTorch**](https://pytorch.org/)
-* [**Matplotlib**](https://matplotlib.org/)
-* [**Pillow**](https://pillow.readthedocs.io/)
-* [**Scipy**](https://www.scipy.org/)
-* [**PSUtil**](https://github.com/giampaolo/psutil)
-* [**PyTorch FID**](https://github.com/mseitzer/pytorch-fid)
-
-<br/>
-
-Run the following command to install the dependencies:
-```shell
-$ pip install -r requirements.txt
-```
-*(You may need to use a [**specific command**](https://pytorch.org/get-started/locally/) for PyTorch if you want to use CUDA)*
-
-<br/>
-
-# 🦾 Training
-
-* First, you need to find and download a dataset of images *(less than 5,000 may be too little and more than 150,000 is not necessary)*. You can find a lot of datasets on [**Kaggle**](https://www.kaggle.com/datasets) and the ones I used on [**my Google Drive**](https://drive.google.com/drive/u/1/folders/15nmil1s50AKEL4PvNPsZ1VSGC_jGGLGE).
-
-* Then, in the `training/settings.py` file, specify the **path** to the dataset
-
-* If you don't have an overpriced 24GB GPU like me, the default settings may not work for you. You can try to:
-	* Lower the **batch size** *(less stable and worse lower point)*
-	* Increase the **accumulation steps** *(fix previous problems but slower)*
-	* Lower the **min features** *(worse results)*
-	* Decrease the **image size**
-
-* Run the `training.ipynb` file *(you can stop the training at any time and resume it later thanks to the checkpoints)*
-
-<br/>
-
-# 🎛️ Trained weights
-
-The trained weights on multiple datasets are available on [**Google Drive**](https://drive.google.com/drive/folders/1m4Puqmb9OD8dcbgr7HStpT7QIFksJ8LR?usp=sharing), you just need to download the `.pt` files and put them in the `models` folder.
-
-<br/>
-
-# ⚗️ Testing
-
-* Run the `testing.ipynb` file to generate random images
-
-* Run the `testing/interpolation.ipynb` file to generate the images of a smooth interpolation video
-
-* Run the `testing/projector.ipynb` file to project real images into the latent space
-
-* Run the `testing/style_mixing.ipynb` file to generate the images of a style mixing interpolation video
-
-* Run the `testing/timelapse.ipynb` file to generate the images of a training timelapse video
 
 <br/>
 
 # 🤖 Model
 
 The model is a Generative Adversarial Network (GAN) like described in the paper [**Generative Adversarial Nets**](https://doi.org/10.48550/arXiv.1406.2661) from **Montreal University** (2014)
+
+<br/>
+
+## 🏗️ Architecture
 
 The generator and the discriminator are both deep convolutional neural networks like in the paper [**Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks**](https://doi.org/10.48550/arXiv.1511.06434) from **Facebook AI Research** (2015) but with a few improvements:
 
@@ -131,7 +80,7 @@ The generator and the discriminator are both deep convolutional neural networks 
 
 <br/>
 
-# 🧪 Tests
+## 🧪 Tests
 
 <p align="center"><b>Human faces 256*256 (FID: 5.97)</b></p>
 <p align="center">
@@ -158,6 +107,62 @@ The generator and the discriminator are both deep convolutional neural networks 
 <p align="center">
 	<img src="resources/misc/paintings.png" width="650">
 </p>
+
+<br/>
+
+## 🎛️ Trained weights
+
+The trained weights on multiple datasets are available on [**Google Drive**](https://drive.google.com/drive/folders/1m4Puqmb9OD8dcbgr7HStpT7QIFksJ8LR?usp=sharing), you just need to download the `.pt` files and put them in the `models` folder.
+
+<br/>
+
+# 📦 Dependencies
+
+* [**Python**](https://www.python.org/)
+* [**PyTorch**](https://pytorch.org/)
+* [**Matplotlib**](https://matplotlib.org/)
+* [**Pillow**](https://pillow.readthedocs.io/)
+* [**Scipy**](https://www.scipy.org/)
+* [**PSUtil**](https://github.com/giampaolo/psutil)
+* [**PyTorch FID**](https://github.com/mseitzer/pytorch-fid)
+
+<br/>
+
+Run the following command to install the dependencies:
+```shell
+$ pip install -r requirements.txt
+```
+*(You may need to use a [**specific command**](https://pytorch.org/get-started/locally/) for PyTorch if you want to use CUDA)*
+
+<br/>
+
+# 🦾 Training
+
+* First, you need to find and download a dataset of images *(less than 5,000 may be too little and more than 150,000 is not necessary)*. You can find a lot of datasets on [**Kaggle**](https://www.kaggle.com/datasets) and the ones I used on [**my Google Drive**](https://drive.google.com/drive/u/1/folders/15nmil1s50AKEL4PvNPsZ1VSGC_jGGLGE).
+
+* Then, in the `training/settings.py` file, specify the **path** to the dataset
+
+* If you don't have an overpriced 24GB GPU like me, the default settings may not work for you. You can try to:
+	* Lower the **batch size** *(less stable and worse lower point)*
+	* Increase the **accumulation steps** *(fix previous problems but slower)*
+	* Lower the **min features** *(worse results)*
+	* Decrease the **image size**
+
+* Run the `training.ipynb` file *(you can stop the training at any time and resume it later thanks to the checkpoints)*
+
+<br/>
+
+# ⚗️ Testing
+
+* Run the `testing.ipynb` file to generate random images
+
+* Run the `testing/interpolation.ipynb` file to generate the images of a smooth interpolation video
+
+* Run the `testing/projector.ipynb` file to project real images into the latent space
+
+* Run the `testing/style_mixing.ipynb` file to generate the images of a style mixing interpolation video
+
+* Run the `testing/timelapse.ipynb` file to generate the images of a training timelapse video
 
 <br/>
 
