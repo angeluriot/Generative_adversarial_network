@@ -1,4 +1,4 @@
-# Generative Adversarial Network (GAN)
+# 🎨 Generative Adversarial Network (GAN)
 
 ![Release](https://img.shields.io/badge/Release-v2.1-blueviolet)
 ![Language](https://img.shields.io/badge/Language-Python-f2cb1b)
@@ -18,20 +18,20 @@ This project is a deep convolutional generative adversarial network that can cre
 
 <br/>
 
-# Summary
+# 📋 Summary
 
-* **[Summary](#summary)**
-* **[Dependencies](#dependencies)**
-* **[Training](#training)**
-* **[Trained weights](#trained-weights)**
-* **[Testing](#testing)**
-* **[Model](#model)**
-* **[Tests](#tests)**
-* **[Credits](#credits)**
+* **[📋 Summary](#-summary)**
+* **[📦 Dependencies](#-dependencies)**
+* **[🦾 Training](#-training)**
+* **[🎛️ Trained weights](#-trained-weights)**
+* **[⚗️ Testing](#-testing)**
+* **[🤖 Model](#-model)**
+* **[🧪 Tests](#-tests)**
+* **[🙏 Credits](#-credits)**
 
 <br/>
 
-# Dependencies
+# 📦 Dependencies
 
 * [**Python**](https://www.python.org/)
 * [**PyTorch**](https://pytorch.org/)
@@ -51,7 +51,7 @@ $ pip install -r requirements.txt
 
 <br/>
 
-# Training
+# 🦾 Training
 
 * First, you need to find and download a dataset of images *(less than 5,000 may be too little and more than 150,000 is not necessary)*. You can find a lot of datasets on [**Kaggle**](https://www.kaggle.com/datasets) and the ones I used on [**my Google Drive**](https://drive.google.com/drive/u/1/folders/15nmil1s50AKEL4PvNPsZ1VSGC_jGGLGE).
 
@@ -67,13 +67,13 @@ $ pip install -r requirements.txt
 
 <br/>
 
-# Trained weights
+# 🎛️ Trained weights
 
 The trained weights on multiple datasets are available on [**Google Drive**](https://drive.google.com/drive/folders/1m4Puqmb9OD8dcbgr7HStpT7QIFksJ8LR?usp=sharing), you just need to download the `.pt` files and put them in the `models` folder.
 
 <br/>
 
-# Testing
+# ⚗️ Testing
 
 * Run the `testing.ipynb` file to generate random images
 
@@ -87,7 +87,7 @@ The trained weights on multiple datasets are available on [**Google Drive**](htt
 
 <br/>
 
-# Model
+# 🤖 Model
 
 The model is a Generative Adversarial Network (GAN) like described in the paper [**Generative Adversarial Nets**](https://doi.org/10.48550/arXiv.1406.2661) from **Montreal University** (2014)
 
@@ -131,7 +131,7 @@ The generator and the discriminator are both deep convolutional neural networks 
 
 <br/>
 
-# Tests
+# 🧪 Tests
 
 <p align="center"><b>Human faces 256*256 (FID: 5.97)</b></p>
 <p align="center">
@@ -161,6 +161,6 @@ The generator and the discriminator are both deep convolutional neural networks 
 
 <br/>
 
-# Credits
+# 🙏 Credits
 
 * [**Angel Uriot**](https://github.com/angeluriot) : Creator of the project.
