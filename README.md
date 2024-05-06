@@ -34,11 +34,9 @@ This project is a deep convolutional generative adversarial network that can cre
 
 # 🤖 Model
 
-The model is a Generative Adversarial Network (GAN) like described in the paper [**Generative Adversarial Nets**](https://doi.org/10.48550/arXiv.1406.2661) from **Montreal University** (2014)
-
-<br/>
-
 ## 🏗️ Architecture
+
+The model is a Generative Adversarial Network (GAN) like described in the paper [**Generative Adversarial Nets**](https://doi.org/10.48550/arXiv.1406.2661) from **Montreal University** (2014)
 
 The generator and the discriminator are both deep convolutional neural networks like in the paper [**Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks**](https://doi.org/10.48550/arXiv.1511.06434) from **Facebook AI Research** (2015) but with a few improvements:
 
